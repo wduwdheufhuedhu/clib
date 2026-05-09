@@ -6,6 +6,19 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
+/**
+ * Sidebar objective helpers intended to run on <strong>1.8.8 through current Paper</strong> without
+ * version-specific implementations.
+ * <p>
+ * Creation uses {@link Scoreboard#registerNewObjective(String, String)} with criteria {@code "dummy"} and
+ * {@link Objective#setDisplayName(String)}. Those APIs exist on every supported release. Modern Paper also
+ * offers {@code Criteria}-based registration and Adventure {@link net.kyori.adventure.text.Component}
+ * display names; we keep the legacy string path so behaviour stays consistent on old servers. Deprecation
+ * warnings on newer API jars are expected and accepted here.
+ * <p>
+ * {@link #init()} applies shorter title and team line limits when the server is older than 1.13, matching
+ * legacy client restrictions while allowing longer text on newer versions.
+ */
 public final class BoardHandler {
 
     private static final String DUMMY_CRITERIA = "dummy";

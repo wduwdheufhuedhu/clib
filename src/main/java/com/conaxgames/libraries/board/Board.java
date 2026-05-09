@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +45,7 @@ public class Board {
 	}
 
 	private static Scoreboard resolveScoreboard(Player player) {
-		var sm = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
+		ScoreboardManager sm = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
 		return player.getScoreboard().equals(sm.getMainScoreboard())
 				? sm.getNewScoreboard()
 				: player.getScoreboard();
