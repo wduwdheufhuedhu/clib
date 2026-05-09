@@ -10,7 +10,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Board {
@@ -29,7 +29,7 @@ public class Board {
 	@Getter
 	private final List<BoardEntry> entries = Collections.synchronizedList(new ArrayList<>());
 	@Getter
-	private final Map<String, String> usedKeys = new ConcurrentHashMap<>();
+	private final Set<String> usedKeys = ConcurrentHashMap.newKeySet();
 	@Getter
 	private final Scoreboard scoreboard;
 	@Getter
@@ -56,7 +56,7 @@ public class Board {
 		String suffix = text.length() > unit ? CC.getLastColors(text.substring(0, unit)) : "";
 		for (String base : ENTRY_KEY_BASES) {
 			String key = base + suffix;
-			if (usedKeys.putIfAbsent(key, text) == null) {
+			if (usedKeys.add(key)) {
 				return key;
 			}
 		}

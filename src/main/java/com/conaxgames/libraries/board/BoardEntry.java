@@ -2,7 +2,6 @@ package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.util.CC;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -10,7 +9,6 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.regex.Pattern;
 
-@Accessors(chain = true)
 public class BoardEntry {
 
     private static final Pattern INVALID_TEAM_CHARS = Pattern.compile("[^a-zA-Z0-9_.-]");
@@ -32,10 +30,10 @@ public class BoardEntry {
         this.board = board;
         this.text = text != null ? text : "";
         this.key = board.getNewKey(this);
-        this.setup();
+        this.registerTeam();
     }
 
-    public void setup() {
+    private void registerTeam() {
         if (this.team == null) {
             Scoreboard sb = board.getScoreboard();
             String name = key.length() > MAX_TEAM_NAME ? key.substring(0, MAX_TEAM_NAME) : key;
