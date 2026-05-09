@@ -49,10 +49,6 @@ public final class BoardHandler {
         return lineSplitUnit;
     }
 
-    public static int maxObjectiveTitleLength() {
-        return maxObjectiveTitleLength;
-    }
-
     static String clipToLength(String value, int maxChars) {
         return value.length() <= maxChars ? value : value.substring(0, maxChars);
     }

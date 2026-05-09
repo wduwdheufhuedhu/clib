@@ -30,21 +30,19 @@ public class BoardEntry {
         this.board = board;
         this.text = text != null ? text : "";
         this.key = board.getNewKey(this);
-        this.registerTeam();
+        registerTeam();
     }
 
     private void registerTeam() {
-        if (this.team == null) {
-            Scoreboard sb = board.getScoreboard();
-            String name = key.length() > MAX_TEAM_NAME ? key.substring(0, MAX_TEAM_NAME) : key;
-            name = INVALID_TEAM_CHARS.matcher(name).replaceAll("");
-            if (name.isEmpty()) {
-                name = TEAM_PREFIX + (++teamCounter);
-            }
-            this.team = sb.registerNewTeam(name);
-            this.team.addEntry(this.key);
-            board.getEntries().add(this);
+        Scoreboard sb = board.getScoreboard();
+        String name = key.length() > MAX_TEAM_NAME ? key.substring(0, MAX_TEAM_NAME) : key;
+        name = INVALID_TEAM_CHARS.matcher(name).replaceAll("");
+        if (name.isEmpty()) {
+            name = TEAM_PREFIX + (++teamCounter);
         }
+        this.team = sb.registerNewTeam(name);
+        this.team.addEntry(this.key);
+        board.getEntries().add(this);
     }
 
     public void send(int position) {
@@ -100,11 +98,10 @@ public class BoardEntry {
         return new String[]{prefix, suffix};
     }
 
-    public BoardEntry setText(String text) {
+    public void setText(String text) {
         if (text != null && !this.text.equals(text)) {
             this.text = text;
             this.cachedSplit = null;
         }
-        return this;
     }
 }
