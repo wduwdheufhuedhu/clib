@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BoardManager implements Runnable {
 
-    /** Metadata flag used elsewhere in Conax plugins to skip automatic sidebar boards. */
     public static final String SKIP_BOARD_METADATA = "cElement";
     private final Map<UUID, Board> playerBoards = new ConcurrentHashMap<>();
     @Getter
