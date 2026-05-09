@@ -5,12 +5,17 @@ import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BoardManager implements Runnable {
 
-    private static final String C_ELEMENT_METADATA_KEY = "cElement";
+    public static final String SKIP_BOARD_METADATA = "cElement";
     private final Map<UUID, Board> playerBoards = new ConcurrentHashMap<>();
     @Getter
     private final BoardAdapter adapter;
@@ -47,8 +52,6 @@ public class BoardManager implements Runnable {
             board.clearAllEntries();
             return;
         }
-        List<String> lines = new ArrayList<>(raw);
-        Collections.reverse(lines);
 
         String newTitle = adapter.getTitle(player);
         if (!Objects.equals(newTitle, board.getLastAppliedTitle())) {
@@ -56,7 +59,7 @@ public class BoardManager implements Runnable {
             BoardHandler.applyObjectiveTitle(board.getObjective(), newTitle);
         }
 
-        syncEntries(board, lines);
+        syncEntries(board, raw);
         Scoreboard sb = board.getScoreboard();
         if (!player.getScoreboard().equals(sb)) {
             player.setScoreboard(sb);
@@ -64,41 +67,44 @@ public class BoardManager implements Runnable {
         }
     }
 
-    private void syncEntries(Board board, List<String> lines) {
+    private void syncEntries(Board board, List<String> raw) {
         List<BoardEntry> entryList = board.getEntries();
         synchronized (entryList) {
-            int n = lines.size();
+            int n = raw.size();
             while (entryList.size() > n) {
                 int last = entryList.size() - 1;
                 entryList.get(last).remove();
                 entryList.remove(last);
             }
-            for (int i = 0; i < n; i++) {
-                String line = lines.get(i);
+            ListIterator<String> descending = raw.listIterator(raw.size());
+            int i = 0;
+            while (descending.hasPrevious()) {
+                String line = descending.previous();
                 int pos = i + 1;
                 BoardEntry entry;
                 if (i < entryList.size()) {
                     entry = entryList.get(i);
                     if (!entry.getText().equals(line)) {
-                        entry.setText(line).setup();
+                        entry.setText(line);
                     }
                 } else {
                     entry = new BoardEntry(board, line);
                 }
                 entry.send(pos);
+                i++;
             }
         }
     }
 
     public void createBoard(Player player) {
-        if (player.hasMetadata(C_ELEMENT_METADATA_KEY) || playerBoards.containsKey(player.getUniqueId())) {
+        if (player.hasMetadata(SKIP_BOARD_METADATA) || playerBoards.containsKey(player.getUniqueId())) {
             return;
         }
         playerBoards.put(player.getUniqueId(), new Board(player, adapter));
     }
 
     public void removeBoard(Player player) {
-        if (player.hasMetadata(C_ELEMENT_METADATA_KEY)) {
+        if (player.hasMetadata(SKIP_BOARD_METADATA)) {
             return;
         }
         Board board = playerBoards.remove(player.getUniqueId());

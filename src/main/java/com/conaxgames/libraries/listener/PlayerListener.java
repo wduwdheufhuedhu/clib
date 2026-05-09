@@ -1,6 +1,7 @@
 package com.conaxgames.libraries.listener;
 
 import com.conaxgames.libraries.LibraryPlugin;
+import com.conaxgames.libraries.board.BoardManager;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,7 +19,7 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (library.getBoardManager() != null && !player.hasMetadata("cElement")) {
+        if (library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA)) {
             library.getBoardManager().createBoard(player);
         }
     }
@@ -26,7 +27,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
         Player player = event.getPlayer();
-        if (library.getBoardManager() != null && !player.hasMetadata("cElement")) {
+        if (library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA)) {
             library.getBoardManager().removeBoard(player);
         }
     }
@@ -34,7 +35,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (library.getBoardManager() != null && !player.hasMetadata("cElement")) {
+        if (library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA)) {
             library.getBoardManager().removeBoard(player);
         }
     }

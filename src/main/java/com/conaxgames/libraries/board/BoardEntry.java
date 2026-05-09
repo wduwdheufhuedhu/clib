@@ -2,7 +2,6 @@ package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.util.CC;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -10,7 +9,6 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.regex.Pattern;
 
-@Accessors(chain = true)
 public class BoardEntry {
 
     private static final Pattern INVALID_TEAM_CHARS = Pattern.compile("[^a-zA-Z0-9_.-]");
@@ -32,30 +30,27 @@ public class BoardEntry {
         this.board = board;
         this.text = text != null ? text : "";
         this.key = board.getNewKey(this);
-        this.setup();
+        registerTeam();
     }
 
-    public void setup() {
-        if (this.team == null) {
-            Scoreboard sb = board.getScoreboard();
-            String name = key.length() > MAX_TEAM_NAME ? key.substring(0, MAX_TEAM_NAME) : key;
-            name = INVALID_TEAM_CHARS.matcher(name).replaceAll("");
-            if (name.isEmpty()) {
-                name = TEAM_PREFIX + (++teamCounter);
-            }
-            this.team = sb.registerNewTeam(name);
-            this.team.addEntry(this.key);
-            board.getEntries().add(this);
+    private void registerTeam() {
+        Scoreboard sb = board.getScoreboard();
+        String name = key.length() > MAX_TEAM_NAME ? key.substring(0, MAX_TEAM_NAME) : key;
+        name = INVALID_TEAM_CHARS.matcher(name).replaceAll("");
+        if (name.isEmpty()) {
+            name = TEAM_PREFIX + (++teamCounter);
         }
+        this.team = sb.registerNewTeam(name);
+        this.team.addEntry(this.key);
+        board.getEntries().add(this);
     }
 
     public void send(int position) {
         Objective obj = board.getObjective();
         String[] split = getSplitText();
-        int maxP = BoardHandler.maxPrefixLength();
-        int maxS = BoardHandler.maxSuffixLength();
-        String prefix = BoardHandler.clipToLength(split[0], maxP);
-        String suffix = BoardHandler.clipToLength(split[1], maxS);
+        int maxLen = BoardHandler.maxTeamSegmentLength();
+        String prefix = BoardHandler.clipToLength(split[0], maxLen);
+        String suffix = BoardHandler.clipToLength(split[1], maxLen);
         if (!prefix.equals(team.getPrefix())) {
             team.setPrefix(prefix);
         }
@@ -102,11 +97,10 @@ public class BoardEntry {
         return new String[]{prefix, suffix};
     }
 
-    public BoardEntry setText(String text) {
+    public void setText(String text) {
         if (text != null && !this.text.equals(text)) {
             this.text = text;
             this.cachedSplit = null;
         }
-        return this;
     }
 }
