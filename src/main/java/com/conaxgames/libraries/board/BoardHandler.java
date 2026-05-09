@@ -69,8 +69,7 @@ public final class BoardHandler {
     }
 
     private static String sidebarTitle(String rawTitle) {
-        String t = rawTitle != null ? CC.translate(rawTitle) : "";
-        return clipToLength(t != null ? t : "", maxObjectiveTitleLength);
+        return clipToLength(CC.translate(rawTitle != null ? rawTitle : ""), maxObjectiveTitleLength);
     }
 
 }

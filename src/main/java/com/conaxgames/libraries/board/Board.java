@@ -28,7 +28,6 @@ public class Board {
 
 	@Getter
 	private final List<BoardEntry> entries = Collections.synchronizedList(new ArrayList<>());
-	private final Map<String, BoardTimer> timers = new ConcurrentHashMap<>();
 	@Getter
 	private final Map<String, String> usedKeys = new ConcurrentHashMap<>();
 	@Getter
@@ -38,7 +37,6 @@ public class Board {
 	private volatile String lastAppliedTitle;
 
 	public Board(Player player, BoardAdapter adapter) {
-		BoardHandler.init();
 		this.scoreboard = resolveScoreboard(player);
 		String title = adapter.getTitle(player);
 		this.lastAppliedTitle = title;
@@ -63,26 +61,6 @@ public class Board {
 			}
 		}
 		throw new IllegalStateException("No free board entry keys");
-	}
-
-	public BoardTimer getTimer(String id) {
-		BoardTimer t = timers.get(id);
-		if (t == null) {
-			return null;
-		}
-		if (t.isExpired()) {
-			timers.remove(id, t);
-			return null;
-		}
-		return t;
-	}
-
-	public void addTimer(BoardTimer timer) {
-		timers.put(timer.getId(), timer);
-	}
-
-	public void removeTimer(String id) {
-		timers.remove(id);
 	}
 
 	public void clearAllEntries() {
