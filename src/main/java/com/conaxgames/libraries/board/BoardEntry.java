@@ -48,10 +48,9 @@ public class BoardEntry {
     public void send(int position) {
         Objective obj = board.getObjective();
         String[] split = getSplitText();
-        int maxP = BoardHandler.maxPrefixLength();
-        int maxS = BoardHandler.maxSuffixLength();
-        String prefix = BoardHandler.clipToLength(split[0], maxP);
-        String suffix = BoardHandler.clipToLength(split[1], maxS);
+        int maxLen = BoardHandler.maxTeamSegmentLength();
+        String prefix = BoardHandler.clipToLength(split[0], maxLen);
+        String suffix = BoardHandler.clipToLength(split[1], maxLen);
         if (!prefix.equals(team.getPrefix())) {
             team.setPrefix(prefix);
         }

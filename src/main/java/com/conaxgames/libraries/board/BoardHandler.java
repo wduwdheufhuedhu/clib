@@ -11,8 +11,7 @@ public final class BoardHandler {
     private static final String DUMMY_CRITERIA = "dummy";
 
     private static volatile boolean initialized;
-    private static int maxPrefixLength = 64;
-    private static int maxSuffixLength = 64;
+    private static int teamSegmentMaxLength = 64;
     private static int lineSplitUnit = 64;
     private static int maxObjectiveTitleLength = 1024;
 
@@ -28,8 +27,7 @@ public final class BoardHandler {
                 return;
             }
             if (VersioningChecker.getInstance().isServerVersionBefore("1.13")) {
-                maxPrefixLength = 16;
-                maxSuffixLength = 16;
+                teamSegmentMaxLength = 16;
                 lineSplitUnit = 16;
                 maxObjectiveTitleLength = 32;
             }
@@ -37,12 +35,8 @@ public final class BoardHandler {
         }
     }
 
-    public static int maxPrefixLength() {
-        return maxPrefixLength;
-    }
-
-    public static int maxSuffixLength() {
-        return maxSuffixLength;
+    public static int maxTeamSegmentLength() {
+        return teamSegmentMaxLength;
     }
 
     public static int lineSplitUnit() {
@@ -55,12 +49,16 @@ public final class BoardHandler {
 
     public static Objective createSidebarObjective(Scoreboard scoreboard, String name, String rawTitle) {
         Objective objective = scoreboard.registerNewObjective(name, DUMMY_CRITERIA);
-        objective.setDisplayName(sidebarTitle(rawTitle));
+        setObjectiveDisplayName(objective, rawTitle);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         return objective;
     }
 
     public static void applyObjectiveTitle(Objective objective, String rawTitle) {
+        setObjectiveDisplayName(objective, rawTitle);
+    }
+
+    private static void setObjectiveDisplayName(Objective objective, String rawTitle) {
         objective.setDisplayName(sidebarTitle(rawTitle));
     }
 

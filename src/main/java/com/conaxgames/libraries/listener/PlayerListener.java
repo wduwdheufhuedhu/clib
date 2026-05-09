@@ -16,10 +16,14 @@ public class PlayerListener implements Listener {
 
     private final LibraryPlugin library;
 
+    private boolean managesBoardFor(Player player) {
+        return library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA);
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA)) {
+        if (managesBoardFor(player)) {
             library.getBoardManager().createBoard(player);
         }
     }
@@ -27,7 +31,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
         Player player = event.getPlayer();
-        if (library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA)) {
+        if (managesBoardFor(player)) {
             library.getBoardManager().removeBoard(player);
         }
     }
@@ -35,7 +39,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (library.getBoardManager() != null && !player.hasMetadata(BoardManager.SKIP_BOARD_METADATA)) {
+        if (managesBoardFor(player)) {
             library.getBoardManager().removeBoard(player);
         }
     }
