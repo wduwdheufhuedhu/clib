@@ -27,7 +27,10 @@ public final class CommentedConfiguration extends YamlConfiguration {
     private final Map<String, String> configComments = new HashMap<>();
 
     public CommentedConfiguration() {
-        this.options().parseComments(false);
+        try {
+            this.options().parseComments(false);
+        } catch (Throwable ignored) {
+        }
     }
 
     public static CommentedConfiguration loadConfiguration(@NonNull File file) throws IOException, InvalidConfigurationException {
@@ -37,7 +40,12 @@ public final class CommentedConfiguration extends YamlConfiguration {
     }
 
     public static CommentedConfiguration loadConfiguration(InputStream inputStream) throws IOException, InvalidConfigurationException {
-        return loadConfiguration(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
+        if (inputStream == null) {
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
+                    "InputStream cannot be null!");
+            throw new IllegalArgumentException("inputStream");
+        }
+        return loadConfiguration(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     }
 
     public static CommentedConfiguration loadConfiguration(Reader reader) throws IOException, InvalidConfigurationException {
@@ -125,8 +133,16 @@ public final class CommentedConfiguration extends YamlConfiguration {
     }
 
     public void syncWithConfig(File file, InputStream resource, String... ignoredSections) throws IOException, InvalidConfigurationException {
-        Objects.requireNonNull(file, "file");
-        Objects.requireNonNull(resource, "resource");
+        if (file == null) {
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
+                    "File cannot be null when using syncWithConfig");
+            return;
+        }
+        if (resource == null) {
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
+                    "Input stream cannot be null when using syncWithConfig");
+            return;
+        }
 
         CommentedConfiguration defaults = loadConfiguration(resource);
         if (syncConfigurationSection(defaults, defaults.getConfigurationSection(""), Arrays.asList(ignoredSections))) {
