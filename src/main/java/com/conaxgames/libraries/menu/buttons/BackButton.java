@@ -8,13 +8,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
-import java.beans.ConstructorProperties;
 import java.util.List;
 
 public class BackButton extends Button {
     private final Menu back;
 
-    @ConstructorProperties(value = {"back"})
     public BackButton(Menu back) {
         this.back = back;
     }
@@ -26,7 +24,7 @@ public class BackButton extends Button {
 
     @Override
     public List<String> getDescription(Player player) {
-        return null;
+        return List.of();
     }
 
     @Override
@@ -35,8 +33,7 @@ public class BackButton extends Button {
     }
 
     @Override
-    public void clicked(Player player, int i, ClickType clickType) {
+    public void clicked(Player player, int slot, ClickType clickType) {
         this.back.openMenu(player, false);
     }
 }
-

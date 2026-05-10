@@ -22,12 +22,12 @@ public class HookButton extends Button {
     }
 
     @Override
-    public String getName(Player var1) {
+    public String getName(Player player) {
         return CC.SECONDARY + plugin.getName();
     }
 
     @Override
-    public List<String> getDescription(Player var1) {
+    public List<String> getDescription(Player player) {
         List<String> description = new ArrayList<>();
 
         boolean hooked = plugin.getDescription().getDepend().contains("cLibraries");
@@ -48,7 +48,7 @@ public class HookButton extends Button {
     }
 
     @Override
-    public Material getMaterial(Player var1) {
+    public Material getMaterial(Player player) {
         return XMaterial.BOOK.get();
     }
 }

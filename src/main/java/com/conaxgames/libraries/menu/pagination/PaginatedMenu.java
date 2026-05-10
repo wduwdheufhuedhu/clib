@@ -29,13 +29,13 @@ public abstract class PaginatedMenu extends Menu {
     }
 
     private boolean hasNext(Player player) {
-        int pg = getPage() + 1;
-        return pg > 0 && getPages(player) >= pg;
+        int pg = this.page + 1;
+        return pg > 0 && this.getPages(player) >= pg;
     }
 
     private boolean hasPrevious(Player player) {
-        int pg = getPage() + -1;
-        return pg > 0 && getPages(player) >= pg;
+        int pg = this.page - 1;
+        return pg > 0 && this.getPages(player) >= pg;
     }
 
     public final int getPages(Player player) {
@@ -43,13 +43,14 @@ public abstract class PaginatedMenu extends Menu {
         if (buttonAmount == 0) {
             return 1;
         }
-        return (int) Math.ceil((double) buttonAmount / (double) this.getMaxItemsPerPage(player));
+        return (int) Math.ceil((double) buttonAmount / this.getMaxItemsPerPage(player));
     }
 
     @Override
     public final Map<Integer, Button> getButtons(Player player) {
-        int minIndex = (int) ((double) (this.page - 1) * (double) this.getMaxItemsPerPage(player));
-        int maxIndex = (int) ((double) this.page * (double) this.getMaxItemsPerPage(player));
+        int maxItems = this.getMaxItemsPerPage(player);
+        int minIndex = (this.page - 1) * maxItems;
+        int maxIndex = this.page * maxItems;
 
         int previousSlot = this.previousPageSlot(player);
         int nextSlot = this.nextPageSlot(player);
@@ -67,7 +68,7 @@ public abstract class PaginatedMenu extends Menu {
             int ind = entry.getKey();
             if (ind < minIndex || ind >= maxIndex) continue;
 
-            int targetSlot = ind - (int) ((double) this.getMaxItemsPerPage(player) * (double) (this.page - 1));
+            int targetSlot = ind - (maxItems * (this.page - 1));
             buttons.put(targetSlot, entry.getValue());
         }
 
@@ -87,12 +88,11 @@ public abstract class PaginatedMenu extends Menu {
         return null;
     }
 
-    public abstract String getPrePaginatedTitle(Player var1);
+    public abstract String getPrePaginatedTitle(Player player);
 
-    public abstract Map<Integer, Button> getAllPagesButtons(Player var1);
+    public abstract Map<Integer, Button> getAllPagesButtons(Player player);
 
-    public abstract int previousPageSlot(Player var1);
+    public abstract int previousPageSlot(Player player);
 
-    public abstract int nextPageSlot(Player var1);
+    public abstract int nextPageSlot(Player player);
 }
-

@@ -11,22 +11,19 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
-import java.beans.ConstructorProperties;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PageButton extends Button {
     private final int mod;
     private final PaginatedMenu menu;
 
-    @ConstructorProperties(value = {"mod", "menu"})
     public PageButton(int mod, PaginatedMenu menu) {
         this.mod = mod;
         this.menu = menu;
     }
 
     @Override
-    public void clicked(Player player, int i, ClickType clickType) {
+    public void clicked(Player player, int slot, ClickType clickType) {
         if (clickType == ClickType.RIGHT) {
             new ViewAllPagesMenu(this.menu).openMenu(player, false);
             return;
@@ -57,13 +54,11 @@ public class PageButton extends Button {
 
     @Override
     public List<String> getDescription(Player player) {
-        return new ArrayList<>();
+        return List.of();
     }
 
     @Override
     public Material getMaterial(Player player) {
         return this.mod > 0 ? XMaterial.GREEN_DYE.get() : XMaterial.RED_DYE.get();
     }
-
 }
-

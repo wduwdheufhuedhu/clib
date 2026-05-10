@@ -19,8 +19,8 @@ public class HookMenu extends Menu {
     }
 
     @Override
-    public Map<Integer, Button> getButtons(Player var1) {
-        HashMap<Integer, Button> buttons = new HashMap<>();
+    public Map<Integer, Button> getButtons(Player player) {
+        Map<Integer, Button> buttons = new HashMap<>();
 
         HookManager hookManager = LibraryPlugin.getInstance().getHookManager();
 
