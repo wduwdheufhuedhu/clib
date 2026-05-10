@@ -10,8 +10,6 @@ import org.bukkit.event.Listener;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Getter
 public class ModuleManager {
@@ -32,12 +30,10 @@ public class ModuleManager {
 
     public void registerModule(Module module) {
         if (!module.canRegister()) {
-            String message = module.getIdentifier() + " cannot be registered as one of its required plugins cannot be found.";
-            library.getLibraryLogger().toConsole("ModuleManager", message);
             return;
         }
 
-        String id = module.getIdentifier().toLowerCase();
+        String id = module.getIdentifier();
         if (modules.containsKey(id)) {
             return;
         }
@@ -53,23 +49,21 @@ public class ModuleManager {
     }
 
     public String enableModule(Module module, boolean save) {
-        Objects.requireNonNull(module, "Module can not be null");
-        Objects.requireNonNull(module.getIdentifier(), "Identifier can not be null");
-
-        String id = module.getIdentifier().toLowerCase();
+        String id = module.getIdentifier();
         if (!modules.containsKey(id)) {
             registerModule(module);
         }
 
         ModuleState state = modules.get(id);
+        if (state == null) {
+            return "Cannot enable " + module.getIdentifier() + " as it is not registered.";
+        }
         if (!state.enabled) {
             setupModule(module);
             if (setModuleEnabled(module)) {
                 state.enabled = true;
             } else {
-                String failMessage = "Failed to enable " + module.getIdentifier();
-                library.getLibraryLogger().toConsole("ModuleManager", failMessage);
-                return failMessage;
+                return "Failed to enable " + module.getIdentifier();
             }
         }
 
@@ -80,8 +74,7 @@ public class ModuleManager {
     }
 
     public String disableModule(Module module, boolean save) {
-        Objects.requireNonNull(module, "Module cannot be null");
-        String id = module.getIdentifier().toLowerCase();
+        String id = module.getIdentifier();
         ModuleState state = modules.get(id);
         if (state == null) {
             String message = "Cannot disable " + module.getIdentifier() + " as it is not registered.";
@@ -94,9 +87,7 @@ public class ModuleManager {
             return message;
         }
         if (!setModuleDisabled(module)) {
-            String failMessage = "Failed to disable " + module.getIdentifier();
-            library.getLibraryLogger().toConsole("ModuleManager", failMessage);
-            return failMessage;
+            return "Failed to disable " + module.getIdentifier();
         }
         state.enabled = false;
         if (save) module.set("enabled", false);
@@ -106,8 +97,11 @@ public class ModuleManager {
     }
 
     public Map<String, Module> getModules() {
-        return modules.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().module));
+        Map<String, Module> result = HashMap.newHashMap(modules.size());
+        for (Map.Entry<String, ModuleState> entry : modules.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().module);
+        }
+        return result;
     }
 
     public Module getModuleByIdentifier(String identifier) {
@@ -116,7 +110,7 @@ public class ModuleManager {
     }
 
     public boolean isModuleEnabled(Module module) {
-        ModuleState state = modules.get(module.getIdentifier().toLowerCase());
+        ModuleState state = modules.get(module.getIdentifier());
         return state != null && state.enabled;
     }
 

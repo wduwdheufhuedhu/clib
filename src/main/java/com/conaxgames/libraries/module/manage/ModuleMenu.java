@@ -59,7 +59,7 @@ public class ModuleMenu extends PaginatedMenu {
                 lore.add(" ");
                 lore.add(CC.GRAY + "Total Modules: " + CC.WHITE + total);
                 lore.add(CC.GRAY + "Enabled: " + CC.GREEN + enabled);
-                lore.add(CC.GRAY + "Disabled: " + CC.RED + disabled);
+                lore.add(CC.GRAY + "Disabled: " + CC.RED + (total - enabled));
                 lore.add(" ");
                 return lore;
             }

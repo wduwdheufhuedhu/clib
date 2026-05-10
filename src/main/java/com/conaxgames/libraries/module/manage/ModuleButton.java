@@ -33,9 +33,7 @@ public class ModuleButton extends Button {
     @Override
     public List<String> getDescription(Player player) {
         List<String> description = new ArrayList<>();
-        String ownedPlugin = module.getJavaPlugin() == null ? "Unknown" : module.getJavaPlugin().getName();
-
-        description.add(CC.DARK_GRAY + ownedPlugin);
+        description.add(CC.DARK_GRAY + module.getJavaPlugin().getName());
         description.add(" ");
         description.addAll(FormatUtil.wordWrap(CC.GRAY + module.getDescription()));
         description.add(" ");

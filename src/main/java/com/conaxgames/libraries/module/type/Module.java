@@ -96,7 +96,6 @@ public abstract class Module {
 
     public void set(String path, Object value) {
         settings.set(path, value);
-        library.getLibraryLogger().toConsole("Module", "Saved " + path + " as " + value + " in " + getIdentifier());
     }
 
     public Config getResource() {
@@ -108,18 +107,10 @@ public abstract class Module {
         Config config = new Config("/modules/" + getIdentifier() + "/" + dest, javaPlugin);
 
         try (InputStream fileStream = javaPlugin.getResource("modules/" + getIdentifier() + "/" + dest + ".yml")) {
-            if (fileStream == null) {
-                library.getLibraryLogger().toConsole("Module", "Input stream was null when attempting to getResource. (Id: " + getIdentifier() + ", JavaPlugin: " + javaPlugin.getName() + ")");
-                return config;
-            }
-
-            if (forceSync || (config.isWasCreated() && syncOnCreation)) {
+            if (fileStream != null && (forceSync || (config.isWasCreated() && syncOnCreation))) {
                 try {
-                    List<String> skip = noSync();
-                    String[] dontSync = skip == null ? new String[0] : skip.toArray(new String[0]);
                     CommentedConfiguration commentedConfiguration = CommentedConfiguration.loadConfiguration(config.getConfigFile());
-                    commentedConfiguration.syncWithConfig(config.getConfigFile(), fileStream, dontSync);
-                    library.getLibraryLogger().toConsole("Module", "Synced /modules/" + getIdentifier() + "/" + dest + ".yml with config.");
+                    commentedConfiguration.syncWithConfig(config.getConfigFile(), fileStream, noSync().toArray(new String[0]));
                 } catch (Exception exception) {
                     library.getLibraryLogger().toConsole("Module", "Unable to sync /modules/" + getIdentifier() + "/" + dest + ".yml with config.", exception);
                 }
