@@ -15,14 +15,6 @@ function App() {
           <a href="#ecosystem">Ecosystem</a>
           <a href="#trust">Trust</a>
         </nav>
-        <div className="header-actions">
-          <a className="btn btn-ghost" href="#docs">
-            Docs
-          </a>
-          <a className="btn btn-solid" href="#download">
-            Download
-          </a>
-        </div>
       </header>
 
       <main>
