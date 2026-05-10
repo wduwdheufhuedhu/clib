@@ -23,11 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * {@link YamlConfiguration} that records {@code #} comment blocks preceding keys and re-inserts them on save.
- * <p>
- * Requires {@link LibraryPlugin} to be initialized before static loaders run so messages use {@link com.conaxgames.libraries.debug.LibraryLogger}.
- */
 public final class CommentedConfiguration extends YamlConfiguration {
 
     private static final String LOG_LABEL = "CommentedConfiguration";
@@ -39,13 +34,9 @@ public final class CommentedConfiguration extends YamlConfiguration {
         try {
             this.options().parseComments(false);
         } catch (Throwable ignored) {
-            // Older Paper/Bukkit API: YamlConfigurationOptions.parseComments(boolean) absent
         }
     }
 
-    /**
-     * Loads from a UTF-8 file. On missing file or read failure, returns a failed instance ({@link #hasFailed()}).
-     */
     public static CommentedConfiguration loadConfiguration(@NonNull File file) {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             return loadConfiguration(reader);
@@ -60,9 +51,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
         }
     }
 
-    /**
-     * Loads from a resource stream (caller-owned lifecycle). Null stream yields a failed instance.
-     */
     public static CommentedConfiguration loadConfiguration(InputStream inputStream) {
         if (inputStream == null) {
             LibraryPlugin.getInstance().getLibraryLogger().toConsole(LOG_LABEL,
@@ -72,9 +60,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
         return loadConfiguration(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     }
 
-    /**
-     * Loads YAML text from a reader (UTF-8 should be ensured by the caller when wrapping byte streams).
-     */
     public static CommentedConfiguration loadConfiguration(Reader reader) {
         CommentedConfiguration config = new CommentedConfiguration();
         try (BufferedReader bufferedReader = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader)) {
@@ -163,11 +148,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
         }
     }
 
-    /**
-     * Merges missing keys and comment metadata from {@code resource} into this configuration, then saves to {@code file}.
-     *
-     * @param ignoredSections subtree paths to skip when traversing defaults (substring match)
-     */
     public void syncWithConfig(File file, InputStream resource, String... ignoredSections) throws IOException {
         if (creationFailure) {
             return;
@@ -211,9 +191,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
         return getComment(path) != null;
     }
 
-    /**
-     * Whether loading failed; callers should avoid using values from this instance.
-     */
     public boolean hasFailed() {
         return creationFailure;
     }
