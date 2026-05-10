@@ -3,6 +3,7 @@ package com.conaxgames.libraries.board;
 import com.conaxgames.libraries.LibraryPlugin;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -46,10 +47,7 @@ public final class BoardManager implements Runnable {
     @SuppressWarnings("deprecation")
     private void updateBoard(Player player, Board board) {
         var lines = adapter.getLines(player, board);
-        if (lines == null || lines.isEmpty()) {
-            board.clearEntries();
-            return;
-        }
+        if (lines == null) lines = List.of();
 
         var newTitle = board.clipTitle(adapter.getTitle(player));
         if (!Objects.equals(newTitle, board.lastTitle())) {

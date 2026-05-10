@@ -75,14 +75,6 @@ public final class Board {
                 : translated.substring(0, limits.titleMax());
     }
 
-    void clearEntries() {
-        synchronized (entries) {
-            for (var entry : entries) entry.remove();
-            entries.clear();
-        }
-        usedKeys.clear();
-    }
-
     Objective objective()        { return objective; }
     List<BoardEntry> entries()   { return entries; }
     BoardLimits limits()         { return limits; }
