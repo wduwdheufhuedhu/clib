@@ -1,5 +1,6 @@
 package com.conaxgames.libraries.config;
 
+import com.conaxgames.libraries.LibraryPlugin;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -24,7 +25,8 @@ public class Config {
                 this.configFile.createNewFile();
                 this.wasCreated = true;
             } catch (IOException e) {
-                e.printStackTrace();
+                LibraryPlugin.getInstance().getLibraryLogger().toConsole("Config",
+                        "Could not create configuration file " + this.configFile.getPath(), e);
             }
         }
         this.config = YamlConfiguration.loadConfiguration(this.configFile);
@@ -34,7 +36,8 @@ public class Config {
         try {
             this.config.save(configFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Config",
+                    "Could not save configuration file " + this.configFile.getPath(), e);
         }
     }
 

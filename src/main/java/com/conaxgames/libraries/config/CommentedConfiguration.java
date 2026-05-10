@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,39 +25,22 @@ import java.util.Objects;
 public final class CommentedConfiguration extends YamlConfiguration {
 
     private final Map<String, String> configComments = new HashMap<>();
-    private boolean creationFailure;
 
     public CommentedConfiguration() {
-        try {
-            this.options().parseComments(false);
-        } catch (Throwable ignored) {
-        }
+        this.options().parseComments(false);
     }
 
-    public static CommentedConfiguration loadConfiguration(@NonNull File file) {
+    public static CommentedConfiguration loadConfiguration(@NonNull File file) throws IOException, InvalidConfigurationException {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             return loadConfiguration(reader);
-        } catch (NoSuchFileException e) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
-                    "File " + file.getName() + " doesn't exist.");
-            return new CommentedConfiguration().flagAsFailed();
-        } catch (IOException e) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
-                    "Could not read file " + file.getName(), e);
-            return new CommentedConfiguration().flagAsFailed();
         }
     }
 
-    public static CommentedConfiguration loadConfiguration(InputStream inputStream) {
-        if (inputStream == null) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
-                    "InputStream cannot be null!");
-            return new CommentedConfiguration().flagAsFailed();
-        }
-        return loadConfiguration(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    public static CommentedConfiguration loadConfiguration(InputStream inputStream) throws IOException, InvalidConfigurationException {
+        return loadConfiguration(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
     }
 
-    public static CommentedConfiguration loadConfiguration(Reader reader) {
+    public static CommentedConfiguration loadConfiguration(Reader reader) throws IOException, InvalidConfigurationException {
         CommentedConfiguration config = new CommentedConfiguration();
         try (BufferedReader bufferedReader = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader)) {
             StringBuilder contents = new StringBuilder();
@@ -67,10 +49,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
                 contents.append(line).append('\n');
             }
             config.loadFromString(contents.toString());
-        } catch (IOException | InvalidConfigurationException ex) {
-            config.flagAsFailed();
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
-                    "Failed to load YAML configuration from reader.", ex);
         }
         return config;
     }
@@ -146,22 +124,9 @@ public final class CommentedConfiguration extends YamlConfiguration {
         }
     }
 
-    public void syncWithConfig(File file, InputStream resource, String... ignoredSections) throws IOException {
-        if (creationFailure) {
-            return;
-        }
-
-        if (file == null) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
-                    "File cannot be null when using syncWithConfig");
-            return;
-        }
-
-        if (resource == null) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
-                    "Input stream cannot be null when using syncWithConfig");
-            return;
-        }
+    public void syncWithConfig(File file, InputStream resource, String... ignoredSections) throws IOException, InvalidConfigurationException {
+        Objects.requireNonNull(file, "file");
+        Objects.requireNonNull(resource, "resource");
 
         CommentedConfiguration defaults = loadConfiguration(resource);
         if (syncConfigurationSection(defaults, defaults.getConfigurationSection(""), Arrays.asList(ignoredSections))) {
@@ -187,10 +152,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
 
     public boolean containsComment(String path) {
         return getComment(path) != null;
-    }
-
-    public boolean hasFailed() {
-        return creationFailure;
     }
 
     @Override
@@ -281,11 +242,6 @@ public final class CommentedConfiguration extends YamlConfiguration {
         }
 
         return changed;
-    }
-
-    private CommentedConfiguration flagAsFailed() {
-        creationFailure = true;
-        return this;
     }
 
 }
