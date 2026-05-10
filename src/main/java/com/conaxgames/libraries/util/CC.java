@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Chat color helpers using only {@link org.bukkit.ChatColor} for maximum compatibility
- * with Paper and Spigot from 1.8.8 through current releases. Hex {@code &#RRGGBB} is
- * expanded to legacy RGB codes for 1.16+ clients; older clients may render that oddly.
- */
 public final class CC {
 
     private CC() {
@@ -124,11 +119,6 @@ public final class CC {
         return ChatColor.translateAlternateColorCodes('&', translatedHex);
     }
 
-    /**
-     * Expands {@code &#RRGGBB} to the RGB legacy sequence understood by Minecraft 1.16+,
-     * using only {@link ChatColor} and plain strings so this stays compatible with Paper
-     * back to 1.8.8 (no BungeeCord {@code ChatColor.of} dependency at runtime).
-     */
     private static String toLegacyHexMinecraft(String rgbHex6) {
         StringBuilder sb = new StringBuilder(14).append(ChatColor.COLOR_CHAR).append('x');
         for (int i = 0; i < rgbHex6.length(); i++) {
