@@ -33,10 +33,7 @@ public final class BoardManager implements Runnable {
 
         boards.entrySet().removeIf(entry -> {
             var player = server.getPlayer(entry.getKey());
-            if (player == null || !player.isOnline()) {
-                entry.getValue().clearEntries();
-                return true;
-            }
+            if (player == null || !player.isOnline()) return true;
             try {
                 updateBoard(player, entry.getValue());
             } catch (Exception ex) {
@@ -95,7 +92,6 @@ public final class BoardManager implements Runnable {
 
     public void removeBoard(Player player) {
         if (player.hasMetadata(SKIP_BOARD_METADATA)) return;
-        var board = boards.remove(player.getUniqueId());
-        if (board != null) board.clearEntries();
+        boards.remove(player.getUniqueId());
     }
 }
