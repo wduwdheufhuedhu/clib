@@ -40,11 +40,11 @@ public class ModuleMenu extends PaginatedMenu {
     @Override
     public Map<Integer, Button> getGlobalButtons(Player player) {
         Map<Integer, Button> buttons = new HashMap<>();
-        int total = moduleManager.getModules().size();
-        long enabled = moduleManager.getModules().values().stream()
+        Map<String, Module> registered = moduleManager.getModules();
+        int total = registered.size();
+        long enabled = registered.values().stream()
                 .filter(moduleManager::isModuleEnabled)
                 .count();
-        int disabled = (int) (total - enabled);
 
         Button infoButton = new Button() {
             @Override
@@ -59,7 +59,7 @@ public class ModuleMenu extends PaginatedMenu {
                 lore.add(" ");
                 lore.add(CC.GRAY + "Total Modules: " + CC.WHITE + total);
                 lore.add(CC.GRAY + "Enabled: " + CC.GREEN + enabled);
-                lore.add(CC.GRAY + "Disabled: " + CC.RED + disabled);
+                lore.add(CC.GRAY + "Disabled: " + CC.RED + (total - enabled));
                 lore.add(" ");
                 return lore;
             }
