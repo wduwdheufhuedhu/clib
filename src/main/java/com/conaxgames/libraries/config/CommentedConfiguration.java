@@ -39,7 +39,7 @@ public final class CommentedConfiguration extends YamlConfiguration {
         try {
             this.options().parseComments(false);
         } catch (Throwable ignored) {
-            // Paper 1.8.x and older API builds: no parseComments(ConfigurationOption)
+            // Older Paper/Bukkit API: YamlConfigurationOptions.parseComments(boolean) absent
         }
     }
 
