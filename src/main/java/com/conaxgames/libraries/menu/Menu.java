@@ -39,10 +39,10 @@ public abstract class Menu {
     private String staticTitle = null;
     private Menu previous;
 
-    public Menu() {
+    protected Menu() {
     }
 
-    public Menu(String staticTitle) {
+    protected Menu(String staticTitle) {
         this.staticTitle = Objects.requireNonNull(staticTitle, "staticTitle");
     }
 
@@ -69,11 +69,10 @@ public abstract class Menu {
             }
         }
 
-        Runnable open = () -> this.open(player);
         if (Bukkit.isPrimaryThread()) {
-            open.run();
+            open(player);
         } else {
-            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), open);
+            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), () -> open(player));
         }
     }
 
@@ -109,14 +108,13 @@ public abstract class Menu {
     }
 
     private void fillInventory(MenuInventoryHolder holder, Player player, Map<Integer, Button> defined, int invSize) {
-        Map<Integer, Button> safe = new HashMap<>();
+        Map<Integer, Button> layout = new HashMap<>();
         for (Map.Entry<Integer, Button> e : defined.entrySet()) {
             int slot = e.getKey();
             if (slot >= 0 && slot < invSize) {
-                safe.put(slot, e.getValue());
+                layout.put(slot, e.getValue());
             }
         }
-        Map<Integer, Button> layout = MenuInventoryHolder.copyLayout(safe);
         if (this.placeholder) {
             Button filler = Button.placeholder(XMaterial.GRAY_STAINED_GLASS_PANE.get(), (byte) 7, CC.DARK_GRAY);
             for (int slot = 0; slot < invSize; slot++) {
@@ -149,23 +147,23 @@ public abstract class Menu {
                         currentlyOpenedMenus.remove(id);
                         return;
                     }
-                    if (!Menu.this.autoUpdate) {
+                    if (!autoUpdate) {
                         return;
                     }
                     if (!(inv.getHolder() instanceof MenuInventoryHolder h)) {
                         cancelCheck(player);
                         return;
                     }
-                    if (h.getMenu() != Menu.this || !h.getViewerId().equals(id)) {
+                    if (h.getMenu() != this || !h.getViewerId().equals(id)) {
                         return;
                     }
-                    Map<Integer, Button> defined = Menu.this.getButtons(player);
-                    int invSize = Menu.this.size(defined);
+                    Map<Integer, Button> defined = getButtons(player);
+                    int invSize = size(defined);
                     if (inv.getSize() != invSize) {
-                        Menu.this.open(player);
+                        open(player);
                         return;
                     }
-                    Menu.this.fillInventory(h, player, defined, invSize);
+                    fillInventory(h, player, defined, invSize);
                 },
                 MENU_UPDATE_DELAY_TICKS,
                 MENU_UPDATE_PERIOD_TICKS
@@ -204,10 +202,6 @@ public abstract class Menu {
         return Math.min(54, rows * 9);
     }
 
-    public int getSlot(int x, int y) {
-        return 9 * y + x;
-    }
-
     public String getTitle(Player player) {
         return this.staticTitle;
     }
@@ -218,16 +212,5 @@ public abstract class Menu {
     }
 
     public void onClose(Player player) {
-    }
-
-    public int getBorderedIndex(int index) {
-        if (index == 7 || index == 16 || index == 25 || index == 34 || index == 43 || index == 52 || index == 61) {
-            return index + 3;
-        }
-        return index + 1;
-    }
-
-    public int getBorderedSize(int listSize) {
-        return (int) Math.max(27, (Math.min(Math.ceil(listSize / 7.0) + 2, 6) * 9));
     }
 }

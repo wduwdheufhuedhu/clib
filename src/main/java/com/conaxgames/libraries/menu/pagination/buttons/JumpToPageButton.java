@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
-import java.beans.ConstructorProperties;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,6 @@ public class JumpToPageButton extends Button {
     @Setter
     private boolean glowing = false;
 
-    @ConstructorProperties(value = {"page", "menu"})
     public JumpToPageButton(int page, PaginatedMenu menu) {
         this.page = page;
         this.menu = menu;
@@ -65,9 +63,8 @@ public class JumpToPageButton extends Button {
     }
 
     @Override
-    public void clicked(Player player, int i, ClickType clickType) {
+    public void clicked(Player player, int slot, ClickType clickType) {
         new MenuButtonJumpToEvent(player, menu, this).call();
         this.menu.modPage(player, this.page - this.menu.getPage());
     }
 }
-

@@ -5,22 +5,17 @@ import com.conaxgames.libraries.menu.Menu;
 import com.conaxgames.libraries.menu.buttons.BackButton;
 import com.conaxgames.libraries.menu.pagination.buttons.JumpToPageButton;
 import com.conaxgames.libraries.util.CC;
-import lombok.Getter;
 import org.bukkit.entity.Player;
 
-import java.beans.ConstructorProperties;
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
 public class ViewAllPagesMenu extends Menu {
 
-    private static final int ROWS = 6;
-    private static final int COLS = 9;
+    private static final int SIZE = 54;
     private static final int BACK_BUTTON_SLOT = 49;
     private final PaginatedMenu menu;
 
-    @ConstructorProperties(value = {"menu"})
     public ViewAllPagesMenu(PaginatedMenu menu) {
         this.menu = menu;
     }
@@ -61,7 +56,6 @@ public class ViewAllPagesMenu extends Menu {
 
     @Override
     public int size(Map<Integer, Button> buttons) {
-        return ROWS * COLS;
+        return SIZE;
     }
 }
-

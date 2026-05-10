@@ -7,7 +7,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,10 +25,6 @@ public final class MenuInventoryHolder implements InventoryHolder {
         this.menu = menu;
         this.viewerId = viewerId;
         this.slotButtons = Collections.emptyMap();
-    }
-
-    static Map<Integer, Button> copyLayout(Map<Integer, Button> source) {
-        return new HashMap<>(source);
     }
 
     public Button getButton(int slot) {

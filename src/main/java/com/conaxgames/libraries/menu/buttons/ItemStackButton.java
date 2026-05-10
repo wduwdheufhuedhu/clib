@@ -17,18 +17,21 @@ public class ItemStackButton extends Button {
 
     @Override
     public ItemStack getButtonItem(Player player) {
-        return (stack);
+        return this.stack;
     }
 
-    public String getName(Player var1) {
+    @Override
+    public String getName(Player player) {
         return null;
     }
 
-    public List<String> getDescription(Player var1) {
+    @Override
+    public List<String> getDescription(Player player) {
         return null;
     }
 
-    public Material getMaterial(Player var1) {
+    @Override
+    public Material getMaterial(Player player) {
         return null;
     }
 }

@@ -24,8 +24,7 @@ public final class IntegerTraitButton<T> extends Button {
     private final Consumer<T> saveFunction;
 
     public IntegerTraitButton(T target, String trait, String description, BiConsumer<T, Integer> writeFunction, Function<T, Integer> readFunction) {
-        this(target, trait, description, writeFunction, readFunction, (i) -> {
-        });
+        this(target, trait, description, writeFunction, readFunction, ignored -> {});
     }
 
     public IntegerTraitButton(T target, String trait, String description, BiConsumer<T, Integer> writeFunction, Function<T, Integer> readFunction, Consumer<T> saveFunction) {
@@ -44,8 +43,7 @@ public final class IntegerTraitButton<T> extends Button {
 
     @Override
     public List<String> getDescription(Player player) {
-
-        ArrayList<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + description));
+        List<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + description));
         lore.add(" ");
         lore.add(CC.GRAY + "Current: " + CC.WHITE + readFunction.apply(target));
         lore.add(" ");
@@ -70,15 +68,12 @@ public final class IntegerTraitButton<T> extends Button {
     public void clicked(Player player, int slot, ClickType clickType) {
         int current = readFunction.apply(target);
         int change = clickType.isShiftClick() ? 10 : 1;
-
         if (clickType.isRightClick()) {
             change = -change;
         }
-
-        writeFunction.accept(target, current + change);
+        int updated = current + change;
+        writeFunction.accept(target, updated);
         saveFunction.accept(target);
-
-        player.sendMessage(CC.GREEN + "Set " + trait + " to " + (current + change) + ".");
+        player.sendMessage(CC.GREEN + "Set " + trait + " to " + updated + ".");
     }
-
 }

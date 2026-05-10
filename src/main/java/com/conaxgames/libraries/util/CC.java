@@ -27,6 +27,14 @@ public final class CC {
     public static final String STRIKE_THROUGH = ChatColor.STRIKETHROUGH.toString();
     public static final String RESET = ChatColor.RESET.toString();
     public static final String MAGIC = ChatColor.MAGIC.toString();
+    public static final String DARK_BLUE = ChatColor.DARK_BLUE.toString();
+    public static final String DARK_AQUA = ChatColor.DARK_AQUA.toString();
+    public static final String DARK_GRAY = ChatColor.DARK_GRAY.toString();
+    public static final String DARK_GREEN = ChatColor.DARK_GREEN.toString();
+    public static final String DARK_PURPLE = ChatColor.DARK_PURPLE.toString();
+    public static final String DARK_RED = ChatColor.DARK_RED.toString();
+    public static final String LIGHT_PURPLE = ChatColor.LIGHT_PURPLE.toString();
+
     public static final String B = BOLD;
     public static final String B_BLUE = BLUE + B;
     public static final String B_AQUA = AQUA + B;
@@ -42,6 +50,7 @@ public final class CC {
     public static final String B_DARK_PURPLE = DARK_PURPLE + B;
     public static final String B_DARK_RED = DARK_RED + B;
     public static final String B_LIGHT_PURPLE = LIGHT_PURPLE + B;
+
     public static final String M = MAGIC;
     public static final String O = MAGIC;
     public static final String I = ITALIC;
@@ -54,14 +63,10 @@ public final class CC {
     public static final String I_GREEN = GREEN + I;
     public static final String I_WHITE = WHITE + I;
     public static final String I_BLACK = BLACK + I;
+
     public static final String S = STRIKE_THROUGH;
     public static final String R = RESET;
-    public static final String DARK_BLUE = ChatColor.DARK_BLUE.toString();
-    public static final String DARK_AQUA = ChatColor.DARK_AQUA.toString();
-    public static final String DARK_GRAY = ChatColor.DARK_GRAY.toString();
-    public static final String DARK_GREEN = ChatColor.DARK_GREEN.toString();
-    public static final String DARK_PURPLE = ChatColor.DARK_PURPLE.toString();
-    public static final String DARK_RED = ChatColor.DARK_RED.toString();
+
     public static final String D_BLUE = DARK_BLUE;
     public static final String BD_BLUE = D_BLUE + B;
     public static final String ID_BLUE = D_BLUE + I;
@@ -80,10 +85,10 @@ public final class CC {
     public static final String D_RED = DARK_RED;
     public static final String BD_RED = D_RED + B;
     public static final String ID_RED = D_RED + I;
-    public static final String LIGHT_PURPLE = ChatColor.LIGHT_PURPLE.toString();
     public static final String L_PURPLE = LIGHT_PURPLE;
     public static final String BL_PURPLE = L_PURPLE + B;
     public static final String IL_PURPLE = L_PURPLE + I;
+
     public static final String U_GREEN = U + GREEN;
     public static final String U_GRAY = U + GRAY;
     public static final String U_WHITE = U + WHITE;

@@ -3,7 +3,6 @@ package com.conaxgames.libraries.menu;
 import com.conaxgames.libraries.util.ItemBuilderUtil;
 import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XSound;
-import com.google.common.collect.ImmutableList;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -13,21 +12,15 @@ import java.util.List;
 
 public abstract class Button {
 
-    @Deprecated
-    public static Button placeholder(Material material, byte data, String... title) {
-        String t = (title == null || title.length == 0) ? "" : String.join("", title);
-        return Button.placeholder(material, data, t);
-    }
-
     public static Button placeholder(Material material) {
-        return Button.placeholder(material, "");
+        return placeholder(material, (byte) 0, "");
     }
 
     public static Button placeholder(Material material, String title) {
-        return Button.placeholder(material, (byte) 0, title);
+        return placeholder(material, (byte) 0, title);
     }
 
-    public static Button placeholder(final Material material, final byte data, final String title) {
+    public static Button placeholder(Material material, byte data, String title) {
         return new Button() {
             @Override
             public String getName(Player player) {
@@ -36,7 +29,7 @@ public abstract class Button {
 
             @Override
             public List<String> getDescription(Player player) {
-                return ImmutableList.of();
+                return List.of();
             }
 
             @Override
@@ -47,30 +40,6 @@ public abstract class Button {
             @Override
             public int getDamageValue(Player player) {
                 return data;
-            }
-        };
-    }
-
-    public static Button fromItem(final ItemStack item) {
-        return new Button() {
-            @Override
-            public ItemStack getButtonItem(Player player) {
-                return item;
-            }
-
-            @Override
-            public String getName(Player player) {
-                return null;
-            }
-
-            @Override
-            public List<String> getDescription(Player player) {
-                return null;
-            }
-
-            @Override
-            public Material getMaterial(Player player) {
-                return null;
             }
         };
     }

@@ -24,8 +24,7 @@ public final class BooleanTraitButton<T> extends Button {
     private final Consumer<T> saveFunction;
 
     public BooleanTraitButton(T target, String trait, String description, BiConsumer<T, Boolean> writeFunction, Function<T, Boolean> readFunction) {
-        this(target, trait, description, writeFunction, readFunction, (i) -> {
-        });
+        this(target, trait, description, writeFunction, readFunction, ignored -> {});
     }
 
     public BooleanTraitButton(T target, String trait, String description, BiConsumer<T, Boolean> writeFunction, Function<T, Boolean> readFunction, Consumer<T> saveFunction) {
@@ -44,12 +43,12 @@ public final class BooleanTraitButton<T> extends Button {
 
     @Override
     public List<String> getDescription(Player player) {
-
-        ArrayList<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + description, 24));
+        boolean enabled = readFunction.apply(target);
+        List<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + description, 24));
         lore.add(" ");
-        lore.add(CC.GRAY + "Current: " + CC.WHITE + (readFunction.apply(target) ? "Enabled" : "Disabled"));
+        lore.add(CC.GRAY + "Current: " + CC.WHITE + (enabled ? "Enabled" : "Disabled"));
         lore.add(" ");
-        lore.add(CC.YELLOW + "Click to " + (readFunction.apply(target) ? "disable" : "enable") + "!");
+        lore.add(CC.YELLOW + "Click to " + (enabled ? "disable" : "enable") + "!");
         return lore;
     }
 
@@ -66,12 +65,9 @@ public final class BooleanTraitButton<T> extends Button {
     @Override
     public void clicked(Player player, int slot, ClickType clickType) {
         boolean current = readFunction.apply(target);
-
         writeFunction.accept(target, !current);
         saveFunction.accept(target);
-
         playNeutral(player);
         player.sendMessage(CC.GREEN + "Set " + trait + " to " + (current ? "off" : "on") + ".");
     }
-
 }
