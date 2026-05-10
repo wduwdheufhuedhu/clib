@@ -1,0 +1,69 @@
+:root {
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --mist: #f4f4f5;
+  --fog: #fafafa;
+  --steel: #525252;
+  --line: #e4e4e7;
+  --muted: #71717a;
+  --display: 'Space Grotesk', system-ui, sans-serif;
+  --body: 'Instrument Sans', system-ui, sans-serif;
+  --max: 1120px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  color-scheme: light;
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.55;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  color: var(--ink);
+  background: var(--paper);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
