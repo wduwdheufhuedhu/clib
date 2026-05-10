@@ -59,15 +59,6 @@ public class BoardManager implements Runnable {
             BoardHandler.applyObjectiveTitle(board.getObjective(), newTitle);
         }
 
-        syncEntries(board, raw);
-        Scoreboard sb = board.getScoreboard();
-        if (!player.getScoreboard().equals(sb)) {
-            player.setScoreboard(sb);
-            adapter.onScoreboardCreate(player, sb);
-        }
-    }
-
-    private void syncEntries(Board board, List<String> raw) {
         List<BoardEntry> entryList = board.getEntries();
         synchronized (entryList) {
             int n = raw.size();
@@ -93,6 +84,12 @@ public class BoardManager implements Runnable {
                 entry.send(pos);
                 i++;
             }
+        }
+
+        Scoreboard sb = board.getScoreboard();
+        if (!player.getScoreboard().equals(sb)) {
+            player.setScoreboard(sb);
+            adapter.onScoreboardCreate(player, sb);
         }
     }
 
