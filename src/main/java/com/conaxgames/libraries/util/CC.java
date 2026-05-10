@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Chat color helpers using only {@link org.bukkit.ChatColor} for maximum compatibility
+ * with Paper and Spigot from 1.8.8 through current releases. Hex {@code &#RRGGBB} is
+ * expanded to legacy RGB codes for 1.16+ clients; older clients may render that oddly.
+ */
 public final class CC {
 
     private CC() {
@@ -27,7 +32,6 @@ public final class CC {
     public static final String STRIKE_THROUGH = ChatColor.STRIKETHROUGH.toString();
     public static final String RESET = ChatColor.RESET.toString();
     public static final String MAGIC = ChatColor.MAGIC.toString();
-    public static final String OBFUSCATED = MAGIC;
     public static final String B = BOLD;
     public static final String B_BLUE = BLUE + B;
     public static final String B_AQUA = AQUA + B;
@@ -68,7 +72,6 @@ public final class CC {
     public static final String ID_BLUE = D_BLUE + I;
     public static final String D_AQUA = DARK_AQUA;
     public static final String BD_AQUA = D_AQUA + B;
-    public static final String BD_DARKAQUA = D_AQUA + B;
     public static final String ID_AQUA = D_AQUA + I;
     public static final String D_GRAY = DARK_GRAY;
     public static final String BD_GRAY = D_GRAY + B;
@@ -84,12 +87,8 @@ public final class CC {
     public static final String ID_RED = D_RED + I;
     public static final String LIGHT_PURPLE = ChatColor.LIGHT_PURPLE.toString();
     public static final String L_PURPLE = LIGHT_PURPLE;
-    public static final String PINK = L_PURPLE;
     public static final String BL_PURPLE = L_PURPLE + B;
     public static final String IL_PURPLE = L_PURPLE + I;
-    public static final String VAPE = "§8 §8 §1 §3 §3 §7 §8 §r";
-    public static final String BLANK_LINE = VAPE;
-    public static final String BL = BLANK_LINE;
     public static final String U_GREEN = U + GREEN;
     public static final String U_GRAY = U + GRAY;
     public static final String U_WHITE = U + WHITE;
@@ -98,6 +97,7 @@ public final class CC {
     public static final String U_LIGHT_PURPLE = U + LIGHT_PURPLE;
     public static final String U_AQUA = U + AQUA;
     public static final String U_DARK_AQUA = U + DARK_AQUA;
+
     private static final Pattern HEX_PATTERN = Pattern.compile("&#[A-Fa-f0-9]{6}");
     private static final Pattern LEGACY_HEX_STRIP = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}");
     private static final Pattern LEGACY_CODES_STRIP = Pattern.compile("(?i)[&§][0-9a-fk-orx]");
