@@ -2,6 +2,7 @@ package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.util.VersioningChecker;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -16,6 +17,7 @@ public final class Board {
 
     private static final String OBJECTIVE_NAME = "sb";
     private static final String DUMMY_CRITERIA = "dummy";
+    private static final boolean LEGACY = VersioningChecker.getInstance().isServerVersionBefore("1.13");
 
     private static final String[] ENTRY_KEYS;
 
@@ -27,7 +29,6 @@ public final class Board {
         }
     }
 
-    private final BoardLimits limits;
     private final List<BoardEntry> entries = new ArrayList<>();
     private final Set<String> usedKeys = ConcurrentHashMap.newKeySet();
     private final Scoreboard scoreboard;
@@ -35,9 +36,7 @@ public final class Board {
     private volatile String lastTitle;
 
     @SuppressWarnings("deprecation")
-    Board(Player player, BoardAdapter adapter, BoardLimits limits) {
-        this.limits = limits;
-
+    Board(Player player, BoardAdapter adapter) {
         var manager = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
         this.scoreboard = player.getScoreboard().equals(manager.getMainScoreboard())
                 ? manager.getNewScoreboard()
@@ -49,13 +48,21 @@ public final class Board {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
     }
 
+    static int segmentMax() {
+        return LEGACY ? 16 : 64;
+    }
+
+    static int titleMax() {
+        return LEGACY ? 32 : 1024;
+    }
+
     public Scoreboard scoreboard() {
         return scoreboard;
     }
 
     String allocateKey(String text) {
-        var suffix = text.length() > limits.lineSplitUnit()
-                ? CC.getLastColors(text.substring(0, limits.lineSplitUnit()))
+        var suffix = text.length() > segmentMax()
+                ? CC.getLastColors(text.substring(0, segmentMax()))
                 : "";
         for (var base : ENTRY_KEYS) {
             var key = base + suffix;
@@ -70,14 +77,13 @@ public final class Board {
 
     String clipTitle(String raw) {
         var translated = CC.translate(raw != null ? raw : "");
-        return translated.length() <= limits.titleMax()
+        return translated.length() <= titleMax()
                 ? translated
-                : translated.substring(0, limits.titleMax());
+                : translated.substring(0, titleMax());
     }
 
     Objective objective()        { return objective; }
     List<BoardEntry> entries()   { return entries; }
-    BoardLimits limits()         { return limits; }
     String lastTitle()           { return lastTitle; }
     void lastTitle(String title) { lastTitle = title; }
 }

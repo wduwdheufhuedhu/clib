@@ -15,11 +15,9 @@ public final class BoardManager implements Runnable {
 
     private final Map<UUID, Board> boards = new ConcurrentHashMap<>();
     private final BoardAdapter adapter;
-    private final BoardLimits limits;
 
     public BoardManager(BoardAdapter adapter) {
         this.adapter = adapter;
-        this.limits = BoardLimits.forCurrentServer();
     }
 
     public BoardAdapter adapter() {
@@ -85,7 +83,7 @@ public final class BoardManager implements Runnable {
 
     public void createBoard(Player player) {
         if (player.hasMetadata(SKIP_BOARD_METADATA) || boards.containsKey(player.getUniqueId())) return;
-        boards.put(player.getUniqueId(), new Board(player, adapter, limits));
+        boards.put(player.getUniqueId(), new Board(player, adapter));
     }
 
     public void removeBoard(Player player) {

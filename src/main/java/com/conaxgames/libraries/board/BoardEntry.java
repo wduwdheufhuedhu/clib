@@ -26,9 +26,9 @@ final class BoardEntry {
     @SuppressWarnings("deprecation")
     void send(int position) {
         var split = split();
-        var limits = board.limits();
-        var prefix = limits.clip(split[0]);
-        var suffix = limits.clip(split[1]);
+        int max = Board.segmentMax();
+        var prefix = split[0].length() <= max ? split[0] : split[0].substring(0, max);
+        var suffix = split[1].length() <= max ? split[1] : split[1].substring(0, max);
 
         if (!prefix.equals(team.getPrefix())) team.setPrefix(prefix);
         if (!suffix.equals(team.getSuffix())) team.setSuffix(suffix);
@@ -58,7 +58,7 @@ final class BoardEntry {
     private String[] split() {
         if (splitCache != null) return splitCache;
         var translated = CC.translate(text);
-        int unit = board.limits().lineSplitUnit();
+        int unit = Board.segmentMax();
 
         if (translated.length() <= unit) {
             return splitCache = new String[]{translated, ""};
