@@ -9,6 +9,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Getter
@@ -105,7 +106,7 @@ public class ModuleManager {
     }
 
     public Module getModuleByIdentifier(String identifier) {
-        ModuleState state = modules.get(identifier.toLowerCase());
+        ModuleState state = modules.get(identifier.toLowerCase(Locale.ROOT));
         return state != null ? state.module : null;
     }
 

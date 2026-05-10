@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 
 @Getter
 public abstract class Module {
@@ -31,7 +32,7 @@ public abstract class Module {
     public abstract String getName();
 
     public String getIdentifier() {
-        return getName().toLowerCase();
+        return getName().toLowerCase(Locale.ROOT);
     }
 
     public boolean isConfiguredToEnable() {
