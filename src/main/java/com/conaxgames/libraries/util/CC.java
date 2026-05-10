@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public final class CC {
+
+    private CC() {
+    }
 
     public static final String U = ChatColor.UNDERLINE.toString();
     public static final String BLUE = ChatColor.BLUE.toString();
@@ -25,7 +27,6 @@ public final class CC {
     public static final String STRIKE_THROUGH = ChatColor.STRIKETHROUGH.toString();
     public static final String RESET = ChatColor.RESET.toString();
     public static final String MAGIC = ChatColor.MAGIC.toString();
-    public static final String OBFUSCATED = MAGIC;
     public static final String B = BOLD;
     public static final String B_BLUE = BLUE + B;
     public static final String B_AQUA = AQUA + B;
@@ -66,7 +67,6 @@ public final class CC {
     public static final String ID_BLUE = D_BLUE + I;
     public static final String D_AQUA = DARK_AQUA;
     public static final String BD_AQUA = D_AQUA + B;
-    public static final String BD_DARKAQUA = D_AQUA + B;
     public static final String ID_AQUA = D_AQUA + I;
     public static final String D_GRAY = DARK_GRAY;
     public static final String BD_GRAY = D_GRAY + B;
@@ -82,12 +82,8 @@ public final class CC {
     public static final String ID_RED = D_RED + I;
     public static final String LIGHT_PURPLE = ChatColor.LIGHT_PURPLE.toString();
     public static final String L_PURPLE = LIGHT_PURPLE;
-    public static final String PINK = L_PURPLE;
     public static final String BL_PURPLE = L_PURPLE + B;
     public static final String IL_PURPLE = L_PURPLE + I;
-    public static final String VAPE = "§8 §8 §1 §3 §3 §7 §8 §r";
-    public static final String BLANK_LINE = VAPE;
-    public static final String BL = BLANK_LINE;
     public static final String U_GREEN = U + GREEN;
     public static final String U_GRAY = U + GRAY;
     public static final String U_WHITE = U + WHITE;
@@ -96,7 +92,11 @@ public final class CC {
     public static final String U_LIGHT_PURPLE = U + LIGHT_PURPLE;
     public static final String U_AQUA = U + AQUA;
     public static final String U_DARK_AQUA = U + DARK_AQUA;
+
     private static final Pattern HEX_PATTERN = Pattern.compile("&#[A-Fa-f0-9]{6}");
+    private static final Pattern LEGACY_HEX_STRIP = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}");
+    private static final Pattern LEGACY_CODES_STRIP = Pattern.compile("(?i)[&§][0-9a-fk-orx]");
+    private static final Pattern INLINE_HEX_STRIP = Pattern.compile("(?i)&#[0-9a-f]{6}");
     public static String PRIMARY = YELLOW;
     public static String B_PRIMARY = PRIMARY + B;
     public static String SECONDARY = GOLD;
@@ -105,7 +105,9 @@ public final class CC {
     public static String B_TERTIARY = TERTIARY + B;
 
     public static String translate(String string) {
-        if (string == null) return null;
+        if (string == null) {
+            return null;
+        }
         String result = string
                 .replace("&p", PRIMARY)
                 .replace("&s", SECONDARY)
@@ -117,18 +119,30 @@ public final class CC {
         return ChatColor.translateAlternateColorCodes('&', translatedHex);
     }
 
+    private static String toLegacyHexMinecraft(String rgbHex6) {
+        StringBuilder sb = new StringBuilder(14).append(ChatColor.COLOR_CHAR).append('x');
+        for (int i = 0; i < rgbHex6.length(); i++) {
+            sb.append(ChatColor.COLOR_CHAR).append(rgbHex6.charAt(i));
+        }
+        return sb.toString();
+    }
+
     private static String translateHex(String message) {
         Matcher hexMatcher = HEX_PATTERN.matcher(message);
+        StringBuilder out = new StringBuilder(message.length() + 16);
         while (hexMatcher.find()) {
-            String hexColor = hexMatcher.group().substring(2);
-            message = message.replace(hexMatcher.group(), net.md_5.bungee.api.ChatColor.of("#" + hexColor).toString());
+            String rgb = hexMatcher.group().substring(2);
+            hexMatcher.appendReplacement(out, Matcher.quoteReplacement(toLegacyHexMinecraft(rgb)));
         }
-
-        return message;
+        hexMatcher.appendTail(out);
+        return out.toString();
     }
 
     public static List<String> translate(List<String> text) {
-        return text.stream().map(CC::translate).collect(Collectors.toList());
+        if (text == null) {
+            return null;
+        }
+        return text.stream().map(CC::translate).toList();
     }
 
     public static List<String> translate(String... text) {
@@ -136,10 +150,12 @@ public final class CC {
     }
 
     public static String stripAllColor(String input) {
-        if (input == null) return null;
-        input = input.replaceAll("(?i)&#[0-9a-f]{6}", "");
-        input = input.replaceAll("(?i)§x(§[0-9a-f]){6}", "");
-        input = input.replaceAll("(?i)[&§][0-9a-fk-or]", "");
+        if (input == null) {
+            return null;
+        }
+        input = INLINE_HEX_STRIP.matcher(input).replaceAll("");
+        input = LEGACY_HEX_STRIP.matcher(input).replaceAll("");
+        input = LEGACY_CODES_STRIP.matcher(input).replaceAll("");
         return ChatColor.stripColor(input);
     }
 
