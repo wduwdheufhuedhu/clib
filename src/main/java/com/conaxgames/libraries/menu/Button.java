@@ -13,14 +13,14 @@ import java.util.List;
 public abstract class Button {
 
     public static Button placeholder(Material material) {
-        return placeholder(material, "");
+        return placeholder(material, (byte) 0, "");
     }
 
     public static Button placeholder(Material material, String title) {
         return placeholder(material, (byte) 0, title);
     }
 
-    public static Button placeholder(final Material material, final byte data, final String title) {
+    public static Button placeholder(Material material, byte data, String title) {
         return new Button() {
             @Override
             public String getName(Player player) {

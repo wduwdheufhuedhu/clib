@@ -3,19 +3,19 @@ package com.conaxgames.libraries.menu.menus;
 import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.menu.Menu;
 import com.conaxgames.libraries.menu.buttons.BooleanButton;
-import com.conaxgames.libraries.util.Callback;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ConfirmMenu extends Menu {
 
     private final String title;
     private final String details;
-    private final Callback<Boolean> response;
+    private final Consumer<Boolean> response;
 
-    public ConfirmMenu(String title, Callback<Boolean> response, String details) {
+    public ConfirmMenu(String title, Consumer<Boolean> response, String details) {
         this.title = title;
         this.details = details;
         this.response = response;

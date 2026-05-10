@@ -12,8 +12,7 @@ import java.util.Map;
 
 public class ViewAllPagesMenu extends Menu {
 
-    private static final int ROWS = 6;
-    private static final int COLS = 9;
+    private static final int SIZE = 54;
     private static final int BACK_BUTTON_SLOT = 49;
     private final PaginatedMenu menu;
 
@@ -57,6 +56,6 @@ public class ViewAllPagesMenu extends Menu {
 
     @Override
     public int size(Map<Integer, Button> buttons) {
-        return ROWS * COLS;
+        return SIZE;
     }
 }

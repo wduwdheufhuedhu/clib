@@ -52,24 +52,20 @@ public abstract class PaginatedMenu extends Menu {
         int minIndex = (this.page - 1) * maxItems;
         int maxIndex = this.page * maxItems;
 
-        int previousSlot = this.previousPageSlot(player);
-        int nextSlot = this.nextPageSlot(player);
-
         HashMap<Integer, Button> buttons = new HashMap<>();
 
         if (hasPrevious(player)) {
-            buttons.put(previousSlot, new PageButton(-1, this));
+            buttons.put(this.previousPageSlot(player), new PageButton(-1, this));
         }
         if (hasNext(player)) {
-            buttons.put(nextSlot, new PageButton(1, this));
+            buttons.put(this.nextPageSlot(player), new PageButton(1, this));
         }
 
         for (Map.Entry<Integer, Button> entry : this.getAllPagesButtons(player).entrySet()) {
             int ind = entry.getKey();
-            if (ind < minIndex || ind >= maxIndex) continue;
-
-            int targetSlot = ind - (maxItems * (this.page - 1));
-            buttons.put(targetSlot, entry.getValue());
+            if (ind >= minIndex && ind < maxIndex) {
+                buttons.put(ind - minIndex, entry.getValue());
+            }
         }
 
         Map<Integer, Button> global = this.getGlobalButtons(player);

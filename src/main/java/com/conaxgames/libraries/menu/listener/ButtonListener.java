@@ -34,10 +34,10 @@ public class ButtonListener implements Listener {
         }
         Menu menu = holder.getMenu();
 
-        if (!menu.isNoncancellingInventory()) {
-            if (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof Player) {
-                event.setCancelled(true);
-            }
+        if (!menu.isNoncancellingInventory()
+                && event.getClickedInventory() != null
+                && event.getClickedInventory().getHolder() instanceof Player) {
+            event.setCancelled(true);
         }
 
         if (event.getSlot() != event.getRawSlot()) {
@@ -48,7 +48,7 @@ public class ButtonListener implements Listener {
         Button button = holder.getButton(event.getSlot());
         if (button != null) {
             boolean cancel = button.shouldCancel(player, event.getSlot(), event.getClick());
-            if (!(cancel || (event.getClick() != ClickType.SHIFT_LEFT && event.getClick() != ClickType.SHIFT_RIGHT))) {
+            if (!cancel && event.getClick().isShiftClick()) {
                 event.setCancelled(true);
                 if (event.getCurrentItem() != null) {
                     player.getInventory().addItem(event.getCurrentItem());
@@ -58,8 +58,7 @@ public class ButtonListener implements Listener {
             }
             button.clicked(player, event.getSlot(), event.getClick());
 
-            UUID id = player.getUniqueId();
-            if (Menu.currentlyOpenedMenus.get(id) == menu && menu.isUpdateAfterClick()) {
+            if (Menu.currentlyOpenedMenus.get(player.getUniqueId()) == menu && menu.isUpdateAfterClick()) {
                 menu.buttonUpdate(player);
                 event.setCancelled(cancel);
             }
@@ -70,26 +69,29 @@ public class ButtonListener implements Listener {
                         1L
                 );
             }
-        } else if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
+        } else if (event.getClick().isShiftClick()) {
             handleShiftIntoTopWhenEmptySlot(event, player, menu);
         }
     }
 
     private void handleBottomInventoryClick(InventoryClickEvent event, Player player, Menu menu) {
-        if (event.getClick() == ClickType.DOUBLE_CLICK || event.getClick() == ClickType.NUMBER_KEY) {
+        ClickType click = event.getClick();
+        if (click == ClickType.DOUBLE_CLICK || click == ClickType.NUMBER_KEY) {
             event.setCancelled(true);
-        }
-        if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
+        } else if (click.isShiftClick()) {
             event.setCancelled(true);
             handleShiftIntoTopWhenEmptySlot(event, player, menu);
         }
     }
 
     private void handleShiftIntoTopWhenEmptySlot(InventoryClickEvent event, Player player, Menu menu) {
-        if (menu.isNoncancellingInventory() && event.getCurrentItem() != null) {
+        if (event.getCurrentItem() == null) {
+            return;
+        }
+        if (menu.isNoncancellingInventory()) {
             XInventoryView.of(player.getOpenInventory()).getTopInventory().addItem(event.getCurrentItem());
             event.setCurrentItem(null);
-        } else if (event.getCurrentItem() != null) {
+        } else {
             event.setCancelled(true);
         }
     }
@@ -100,8 +102,7 @@ public class ButtonListener implements Listener {
             return;
         }
         UUID id = player.getUniqueId();
-        Inventory inv = event.getInventory();
-        if (!(inv.getHolder() instanceof MenuInventoryHolder holder)) {
+        if (!(event.getInventory().getHolder() instanceof MenuInventoryHolder holder)) {
             return;
         }
         if (!holder.getViewerId().equals(id)) {

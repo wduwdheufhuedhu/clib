@@ -69,11 +69,10 @@ public abstract class Menu {
             }
         }
 
-        Runnable open = () -> this.open(player);
         if (Bukkit.isPrimaryThread()) {
-            open.run();
+            open(player);
         } else {
-            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), open);
+            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), () -> open(player));
         }
     }
 
@@ -109,14 +108,13 @@ public abstract class Menu {
     }
 
     private void fillInventory(MenuInventoryHolder holder, Player player, Map<Integer, Button> defined, int invSize) {
-        Map<Integer, Button> safe = new HashMap<>();
+        Map<Integer, Button> layout = new HashMap<>();
         for (Map.Entry<Integer, Button> e : defined.entrySet()) {
             int slot = e.getKey();
             if (slot >= 0 && slot < invSize) {
-                safe.put(slot, e.getValue());
+                layout.put(slot, e.getValue());
             }
         }
-        Map<Integer, Button> layout = new HashMap<>(safe);
         if (this.placeholder) {
             Button filler = Button.placeholder(XMaterial.GRAY_STAINED_GLASS_PANE.get(), (byte) 7, CC.DARK_GRAY);
             for (int slot = 0; slot < invSize; slot++) {
@@ -149,23 +147,23 @@ public abstract class Menu {
                         currentlyOpenedMenus.remove(id);
                         return;
                     }
-                    if (!Menu.this.autoUpdate) {
+                    if (!autoUpdate) {
                         return;
                     }
                     if (!(inv.getHolder() instanceof MenuInventoryHolder h)) {
                         cancelCheck(player);
                         return;
                     }
-                    if (h.getMenu() != Menu.this || !h.getViewerId().equals(id)) {
+                    if (h.getMenu() != this || !h.getViewerId().equals(id)) {
                         return;
                     }
-                    Map<Integer, Button> defined = Menu.this.getButtons(player);
-                    int invSize = Menu.this.size(defined);
+                    Map<Integer, Button> defined = getButtons(player);
+                    int invSize = size(defined);
                     if (inv.getSize() != invSize) {
-                        Menu.this.open(player);
+                        open(player);
                         return;
                     }
-                    Menu.this.fillInventory(h, player, defined, invSize);
+                    fillInventory(h, player, defined, invSize);
                 },
                 MENU_UPDATE_DELAY_TICKS,
                 MENU_UPDATE_PERIOD_TICKS
