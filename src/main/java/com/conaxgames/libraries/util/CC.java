@@ -141,8 +141,7 @@ public final class CC {
         Matcher hexMatcher = HEX_PATTERN.matcher(message);
         StringBuilder out = new StringBuilder(message.length() + 16);
         while (hexMatcher.find()) {
-            String full = hexMatcher.group();
-            String rgb = full.substring(2);
+            String rgb = hexMatcher.group().substring(2);
             hexMatcher.appendReplacement(out, Matcher.quoteReplacement(toLegacyHexMinecraft(rgb)));
         }
         hexMatcher.appendTail(out);
