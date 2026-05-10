@@ -9,14 +9,12 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class Board {
 
-    private static final String OBJECTIVE_NAME = "sb";
-    private static final String DUMMY_CRITERIA = "dummy";
     private static final boolean LEGACY = VersioningChecker.getInstance().isServerVersionBefore("1.13");
 
     private static final String[] ENTRY_KEYS;
@@ -30,7 +28,7 @@ public final class Board {
     }
 
     private final List<BoardEntry> entries = new ArrayList<>();
-    private final Set<String> usedKeys = ConcurrentHashMap.newKeySet();
+    private final Set<String> usedKeys = new HashSet<>();
     private final Scoreboard scoreboard;
     private final Objective objective;
     private volatile String lastTitle;
@@ -43,7 +41,7 @@ public final class Board {
                 : player.getScoreboard();
 
         this.lastTitle = clipTitle(adapter.getTitle(player));
-        this.objective = scoreboard.registerNewObjective(OBJECTIVE_NAME, DUMMY_CRITERIA);
+        this.objective = scoreboard.registerNewObjective("sb", "dummy");
         objective.setDisplayName(lastTitle);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
     }

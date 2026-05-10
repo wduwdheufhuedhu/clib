@@ -54,24 +54,22 @@ public final class BoardManager implements Runnable {
         }
 
         var entries = board.entries();
-        synchronized (entries) {
-            while (entries.size() > lines.size()) {
-                entries.removeLast().remove();
-            }
+        while (entries.size() > lines.size()) {
+            entries.removeLast().remove();
+        }
 
-            int i = 0;
-            for (var line : lines.reversed()) {
-                BoardEntry entry;
-                if (i < entries.size()) {
-                    entry = entries.get(i);
-                    entry.text(line);
-                } else {
-                    entry = new BoardEntry(board, line);
-                    entries.add(entry);
-                }
-                entry.send(i + 1);
-                i++;
+        int i = 0;
+        for (var line : lines.reversed()) {
+            BoardEntry entry;
+            if (i < entries.size()) {
+                entry = entries.get(i);
+                entry.text(line);
+            } else {
+                entry = new BoardEntry(board, line);
+                entries.add(entry);
             }
+            entry.send(i + 1);
+            i++;
         }
 
         var sb = board.scoreboard();
