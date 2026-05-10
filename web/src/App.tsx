@@ -4,19 +4,22 @@ import './App.css'
 
 function App() {
   return (
-    <div className="page">
+    <div className="app">
       <header className="header">
-        <a className="brand" href="/">
-          <span className="brand-mark" aria-hidden="true" />
-          <span className="brand-name">Nimbus</span>
-        </a>
-        <nav className="nav" aria-label="Primary">
-          <a href="#products">Products</a>
-          <a href="#ecosystem">Ecosystem</a>
-          <a href="#trust">Trust</a>
-        </nav>
+        <div className="header-inner">
+          <a className="brand" href="/">
+            <span className="brand-mark" aria-hidden="true" />
+            <span className="brand-name">Nimbus</span>
+          </a>
+          <nav className="nav" aria-label="Primary">
+            <a href="#products">Products</a>
+            <a href="#ecosystem">Ecosystem</a>
+            <a href="#trust">Trust</a>
+          </nav>
+        </div>
       </header>
 
+      <div className="page">
       <main>
         <section className="hero" aria-labelledby="hero-heading">
           <div className="hero-copy">
@@ -154,6 +157,7 @@ function App() {
         </nav>
         <p className="footer-meta">© {new Date().getFullYear()} Nimbus · Dummy landing · Inspired by papermc.io tone</p>
       </footer>
+      </div>
     </div>
   )
 }
