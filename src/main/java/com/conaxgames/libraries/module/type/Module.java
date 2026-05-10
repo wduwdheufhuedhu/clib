@@ -109,11 +109,6 @@ public abstract class Module {
         String dest = destination.replace(".yml", "");
         Config config = new Config("/modules/" + getIdentifier() + "/" + dest, javaPlugin);
 
-        if (config.getConfigFile() == null) {
-            library.getLibraryLogger().toConsole("Module", "Configuration was null when attempting to getResource. (" + getIdentifier() + ", " + javaPlugin.getName() + ")");
-            return config;
-        }
-
         InputStream fileStream = javaPlugin.getResource("modules/" + getIdentifier() + "/" + dest + ".yml");
         if (fileStream == null) {
             library.getLibraryLogger().toConsole("Module", "Input stream was null when attempting to getResource. (Id: " + getIdentifier() + ", JavaPlugin: " + javaPlugin.getName() + ")");
