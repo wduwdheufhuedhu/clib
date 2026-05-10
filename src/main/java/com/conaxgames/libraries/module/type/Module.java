@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
@@ -116,6 +117,7 @@ public abstract class Module {
                     library.getLibraryLogger().toConsole("Module", "Unable to sync /modules/" + getIdentifier() + "/" + dest + ".yml with config.", exception);
                 }
             }
+        } catch (IOException ignored) {
         }
 
         return config;

@@ -2,84 +2,91 @@ package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.util.CC;
-import lombok.Getter;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Board {
+public final class Board {
 
-	private static final String OBJECTIVE_NAME = "sb";
-	private static final String[] ENTRY_KEY_BASES;
+    private static final String OBJECTIVE_NAME = "sb";
+    private static final String DUMMY_CRITERIA = "dummy";
 
-	static {
-		String codes = "0123456789abcdefklmor";
-		ENTRY_KEY_BASES = new String[codes.length()];
-		for (int i = 0; i < codes.length(); i++) {
-			ENTRY_KEY_BASES[i] = "\u00a7" + codes.charAt(i) + "\u00a7f";
-		}
-	}
+    /** 21 unique invisible entry keys built from Minecraft formatting codes. */
+    private static final String[] ENTRY_KEYS;
 
-	@Getter
-	private final List<BoardEntry> entries = Collections.synchronizedList(new ArrayList<>());
-	@Getter
-	private final Set<String> usedKeys = ConcurrentHashMap.newKeySet();
-	@Getter
-	private final Scoreboard scoreboard;
-	@Getter
-	private final Objective objective;
-	private volatile String lastAppliedTitle;
+    static {
+        var codes = "0123456789abcdefklmor";
+        ENTRY_KEYS = new String[codes.length()];
+        for (int i = 0; i < codes.length(); i++) {
+            ENTRY_KEYS[i] = "\u00a7" + codes.charAt(i) + "\u00a7f";
+        }
+    }
 
-	public Board(Player player, BoardAdapter adapter) {
-		this.scoreboard = resolveScoreboard(player);
-		String title = adapter.getTitle(player);
-		this.lastAppliedTitle = title;
-		this.objective = BoardHandler.createSidebarObjective(this.scoreboard, OBJECTIVE_NAME, title);
-	}
+    private final BoardLimits limits;
+    private final List<BoardEntry> entries = new ArrayList<>();
+    private final Set<String> usedKeys = ConcurrentHashMap.newKeySet();
+    private final Scoreboard scoreboard;
+    private final Objective objective;
+    private volatile String lastTitle;
 
-	private static Scoreboard resolveScoreboard(Player player) {
-		ScoreboardManager sm = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
-		return player.getScoreboard().equals(sm.getMainScoreboard())
-				? sm.getNewScoreboard()
-				: player.getScoreboard();
-	}
+    @SuppressWarnings("deprecation")
+    Board(Player player, BoardAdapter adapter, BoardLimits limits) {
+        this.limits = limits;
 
-	public String getNewKey(BoardEntry entry) {
-		String text = entry.getText();
-		int unit = BoardHandler.lineSplitUnit();
-		String suffix = text.length() > unit ? CC.getLastColors(text.substring(0, unit)) : "";
-		for (String base : ENTRY_KEY_BASES) {
-			String key = base + suffix;
-			if (usedKeys.add(key)) {
-				return key;
-			}
-		}
-		throw new IllegalStateException("No free board entry keys");
-	}
+        var manager = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
+        this.scoreboard = player.getScoreboard().equals(manager.getMainScoreboard())
+                ? manager.getNewScoreboard()
+                : player.getScoreboard();
 
-	public void clearAllEntries() {
-		synchronized (entries) {
-			for (BoardEntry e : entries) {
-				e.remove();
-			}
-			entries.clear();
-		}
-		usedKeys.clear();
-	}
+        this.lastTitle = clipTitle(adapter.getTitle(player));
+        this.objective = scoreboard.registerNewObjective(OBJECTIVE_NAME, DUMMY_CRITERIA);
+        objective.setDisplayName(lastTitle);
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+    }
 
-	String getLastAppliedTitle() {
-		return lastAppliedTitle;
-	}
+    public Scoreboard scoreboard() {
+        return scoreboard;
+    }
 
-	void setLastAppliedTitle(String title) {
-		this.lastAppliedTitle = title;
-	}
+    String allocateKey(String text) {
+        var suffix = text.length() > limits.lineSplitUnit()
+                ? CC.getLastColors(text.substring(0, limits.lineSplitUnit()))
+                : "";
+        for (var base : ENTRY_KEYS) {
+            var key = base + suffix;
+            if (usedKeys.add(key)) return key;
+        }
+        throw new IllegalStateException("No free board entry keys (max " + ENTRY_KEYS.length + ")");
+    }
 
+    void releaseKey(String key) {
+        usedKeys.remove(key);
+    }
+
+    String clipTitle(String raw) {
+        var translated = CC.translate(raw != null ? raw : "");
+        return translated.length() <= limits.titleMax()
+                ? translated
+                : translated.substring(0, limits.titleMax());
+    }
+
+    void clearEntries() {
+        synchronized (entries) {
+            for (var entry : entries) entry.remove();
+            entries.clear();
+        }
+        usedKeys.clear();
+    }
+
+    Objective objective()        { return objective; }
+    List<BoardEntry> entries()   { return entries; }
+    BoardLimits limits()         { return limits; }
+    String lastTitle()           { return lastTitle; }
+    void lastTitle(String title) { lastTitle = title; }
 }

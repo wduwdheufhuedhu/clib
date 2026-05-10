@@ -1,106 +1,83 @@
 package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.util.CC;
-import lombok.Getter;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class BoardEntry {
+final class BoardEntry {
 
-    private static final Pattern INVALID_TEAM_CHARS = Pattern.compile("[^a-zA-Z0-9_.-]");
-    private static final int MAX_TEAM_NAME = 16;
-    private static final String TEAM_PREFIX = "sb_";
-    private static int teamCounter = 0;
+    private static final AtomicInteger TEAM_COUNTER = new AtomicInteger();
 
-    @Getter
     private final Board board;
-    @Getter
     private final String key;
-    @Getter
-    private Team team;
-    @Getter
+    private final Team team;
     private String text;
-    private String[] cachedSplit;
+    private String[] splitCache;
 
-    public BoardEntry(Board board, String text) {
+    BoardEntry(Board board, String text) {
         this.board = board;
         this.text = text != null ? text : "";
-        this.key = board.getNewKey(this);
-        registerTeam();
+        this.key = board.allocateKey(this.text);
+        this.team = board.scoreboard().registerNewTeam("board_" + TEAM_COUNTER.getAndIncrement());
+        team.addEntry(key);
     }
 
-    private void registerTeam() {
-        Scoreboard sb = board.getScoreboard();
-        String name = key.length() > MAX_TEAM_NAME ? key.substring(0, MAX_TEAM_NAME) : key;
-        name = INVALID_TEAM_CHARS.matcher(name).replaceAll("");
-        if (name.isEmpty()) {
-            name = TEAM_PREFIX + (++teamCounter);
-        }
-        this.team = sb.registerNewTeam(name);
-        this.team.addEntry(this.key);
-        board.getEntries().add(this);
+    @SuppressWarnings("deprecation")
+    void send(int position) {
+        var split = split();
+        var limits = board.limits();
+        var prefix = limits.clip(split[0]);
+        var suffix = limits.clip(split[1]);
+
+        if (!prefix.equals(team.getPrefix())) team.setPrefix(prefix);
+        if (!suffix.equals(team.getSuffix())) team.setSuffix(suffix);
+
+        var score = board.objective().getScore(key);
+        if (score.getScore() != position) score.setScore(position);
     }
 
-    public void send(int position) {
-        Objective obj = board.getObjective();
-        String[] split = getSplitText();
-        int maxLen = BoardHandler.maxTeamSegmentLength();
-        String prefix = BoardHandler.clipToLength(split[0], maxLen);
-        String suffix = BoardHandler.clipToLength(split[1], maxLen);
-        if (!prefix.equals(team.getPrefix())) {
-            team.setPrefix(prefix);
-        }
-        if (!suffix.equals(team.getSuffix())) {
-            team.setSuffix(suffix);
-        }
-        Score score = obj.getScore(this.key);
-        if (score.getScore() != position) {
-            score.setScore(position);
-        }
+    void remove() {
+        board.releaseKey(key);
+        board.scoreboard().resetScores(key);
+        team.removeEntry(key);
+        team.unregister();
     }
 
-    public void remove() {
-        board.getUsedKeys().remove(this.key);
-        board.getScoreboard().resetScores(this.key);
-        if (team != null) {
-            team.removeEntry(this.key);
-            team.unregister();
+    void text(String newText) {
+        if (newText != null && !text.equals(newText)) {
+            text = newText;
+            splitCache = null;
         }
     }
 
-    private String[] getSplitText() {
-        if (cachedSplit == null) {
-            cachedSplit = splitLine(CC.translate(text));
-        }
-        return cachedSplit;
+    String text() {
+        return text;
     }
 
-    private String[] splitLine(String input) {
-        int unit = BoardHandler.lineSplitUnit();
-        if (input.length() <= unit) {
-            return new String[]{input, ""};
+    private String[] split() {
+        if (splitCache != null) return splitCache;
+        var translated = CC.translate(text);
+        int unit = board.limits().lineSplitUnit();
+
+        if (translated.length() <= unit) {
+            return splitCache = new String[]{translated, ""};
         }
-        String prefix = input.substring(0, unit);
+
+        var prefix = translated.substring(0, unit);
         int lastColor = prefix.lastIndexOf('\u00a7');
-        String suffix;
         if (lastColor >= unit - 2) {
-            prefix = prefix.substring(0, lastColor);
-            int end = Math.min(input.length(), unit + 1);
-            suffix = CC.getLastColors(input.substring(0, end)) + input.substring(lastColor + 2);
-        } else {
-            suffix = CC.getLastColors(prefix) + input.substring(unit);
+            var trimmed = prefix.substring(0, lastColor);
+            int end = Math.min(translated.length(), unit + 1);
+            return splitCache = new String[]{
+                    trimmed,
+                    CC.getLastColors(translated.substring(0, end)) + translated.substring(lastColor + 2)
+            };
         }
-        return new String[]{prefix, suffix};
-    }
 
-    public void setText(String text) {
-        if (text != null && !this.text.equals(text)) {
-            this.text = text;
-            this.cachedSplit = null;
-        }
+        return splitCache = new String[]{
+                prefix,
+                CC.getLastColors(prefix) + translated.substring(unit)
+        };
     }
 }

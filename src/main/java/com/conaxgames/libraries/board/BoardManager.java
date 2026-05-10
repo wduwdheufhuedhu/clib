@@ -1,92 +1,87 @@
 package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.LibraryPlugin;
-import lombok.Getter;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BoardManager implements Runnable {
+public final class BoardManager implements Runnable {
 
     public static final String SKIP_BOARD_METADATA = "cElement";
-    private final Map<UUID, Board> playerBoards = new ConcurrentHashMap<>();
-    @Getter
+
+    private final Map<UUID, Board> boards = new ConcurrentHashMap<>();
     private final BoardAdapter adapter;
+    private final BoardLimits limits;
 
     public BoardManager(BoardAdapter adapter) {
         this.adapter = adapter;
+        this.limits = BoardLimits.forCurrentServer();
+    }
+
+    public BoardAdapter adapter() {
+        return adapter;
     }
 
     @Override
     public void run() {
         adapter.preLoop();
-        Iterator<Map.Entry<UUID, Board>> it = playerBoards.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<UUID, Board> e = it.next();
-            Board board = e.getValue();
-            Player player = LibraryPlugin.getInstance().getPlugin().getServer().getPlayer(e.getKey());
+        var server = LibraryPlugin.getInstance().getPlugin().getServer();
+        var logger = LibraryPlugin.getInstance().getPlugin().getLogger();
+
+        boards.entrySet().removeIf(entry -> {
+            var player = server.getPlayer(entry.getKey());
             if (player == null || !player.isOnline()) {
-                it.remove();
-                board.clearAllEntries();
-                continue;
+                entry.getValue().clearEntries();
+                return true;
             }
             try {
-                updateBoard(player, board);
+                updateBoard(player, entry.getValue());
             } catch (Exception ex) {
-                LibraryPlugin.getInstance().getPlugin().getLogger()
-                        .severe("Scoreboard error for " + player.getName() + ": " + ex.getMessage());
+                logger.severe("Scoreboard error for " + player.getName() + ": " + ex.getMessage());
             }
-        }
+            return false;
+        });
     }
 
+    @SuppressWarnings("deprecation")
     private void updateBoard(Player player, Board board) {
-        List<String> raw = adapter.getLines(player, board);
-        if (raw == null || raw.isEmpty()) {
-            board.clearAllEntries();
+        var lines = adapter.getLines(player, board);
+        if (lines == null || lines.isEmpty()) {
+            board.clearEntries();
             return;
         }
 
-        String newTitle = adapter.getTitle(player);
-        if (!Objects.equals(newTitle, board.getLastAppliedTitle())) {
-            board.setLastAppliedTitle(newTitle);
-            BoardHandler.applyObjectiveTitle(board.getObjective(), newTitle);
+        var newTitle = board.clipTitle(adapter.getTitle(player));
+        if (!Objects.equals(newTitle, board.lastTitle())) {
+            board.lastTitle(newTitle);
+            board.objective().setDisplayName(newTitle);
         }
 
-        List<BoardEntry> entryList = board.getEntries();
-        synchronized (entryList) {
-            int n = raw.size();
-            while (entryList.size() > n) {
-                int last = entryList.size() - 1;
-                entryList.get(last).remove();
-                entryList.remove(last);
+        var entries = board.entries();
+        synchronized (entries) {
+            while (entries.size() > lines.size()) {
+                entries.removeLast().remove();
             }
-            ListIterator<String> descending = raw.listIterator(raw.size());
+
             int i = 0;
-            while (descending.hasPrevious()) {
-                String line = descending.previous();
-                int pos = i + 1;
+            for (var line : lines.reversed()) {
                 BoardEntry entry;
-                if (i < entryList.size()) {
-                    entry = entryList.get(i);
-                    if (!entry.getText().equals(line)) {
-                        entry.setText(line);
-                    }
+                if (i < entries.size()) {
+                    entry = entries.get(i);
+                    entry.text(line);
                 } else {
                     entry = new BoardEntry(board, line);
+                    entries.add(entry);
                 }
-                entry.send(pos);
+                entry.send(i + 1);
                 i++;
             }
         }
 
-        Scoreboard sb = board.getScoreboard();
+        var sb = board.scoreboard();
         if (!player.getScoreboard().equals(sb)) {
             player.setScoreboard(sb);
             adapter.onScoreboardCreate(player, sb);
@@ -94,19 +89,13 @@ public class BoardManager implements Runnable {
     }
 
     public void createBoard(Player player) {
-        if (player.hasMetadata(SKIP_BOARD_METADATA) || playerBoards.containsKey(player.getUniqueId())) {
-            return;
-        }
-        playerBoards.put(player.getUniqueId(), new Board(player, adapter));
+        if (player.hasMetadata(SKIP_BOARD_METADATA) || boards.containsKey(player.getUniqueId())) return;
+        boards.put(player.getUniqueId(), new Board(player, adapter, limits));
     }
 
     public void removeBoard(Player player) {
-        if (player.hasMetadata(SKIP_BOARD_METADATA)) {
-            return;
-        }
-        Board board = playerBoards.remove(player.getUniqueId());
-        if (board != null) {
-            board.clearAllEntries();
-        }
+        if (player.hasMetadata(SKIP_BOARD_METADATA)) return;
+        var board = boards.remove(player.getUniqueId());
+        if (board != null) board.clearEntries();
     }
 }
