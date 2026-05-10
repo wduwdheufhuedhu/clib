@@ -39,11 +39,11 @@ public final class CommentedConfiguration extends YamlConfiguration {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             return loadConfiguration(reader);
         } catch (NoSuchFileException e) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Commented configuration",
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
                     "File " + file.getName() + " doesn't exist.");
             return new CommentedConfiguration().flagAsFailed();
         } catch (IOException e) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Commented configuration",
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
                     "Could not read file " + file.getName(), e);
             return new CommentedConfiguration().flagAsFailed();
         }
@@ -51,7 +51,7 @@ public final class CommentedConfiguration extends YamlConfiguration {
 
     public static CommentedConfiguration loadConfiguration(InputStream inputStream) {
         if (inputStream == null) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Commented configuration",
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
                     "InputStream cannot be null!");
             return new CommentedConfiguration().flagAsFailed();
         }
@@ -69,7 +69,7 @@ public final class CommentedConfiguration extends YamlConfiguration {
             config.loadFromString(contents.toString());
         } catch (IOException | InvalidConfigurationException ex) {
             config.flagAsFailed();
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Commented configuration",
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
                     "Failed to load YAML configuration from reader.", ex);
         }
         return config;
@@ -152,13 +152,13 @@ public final class CommentedConfiguration extends YamlConfiguration {
         }
 
         if (file == null) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Commented configuration",
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
                     "File cannot be null when using syncWithConfig");
             return;
         }
 
         if (resource == null) {
-            LibraryPlugin.getInstance().getLibraryLogger().toConsole("Commented configuration",
+            LibraryPlugin.getInstance().getLibraryLogger().toConsole("CommentedConfiguration",
                     "Input stream cannot be null when using syncWithConfig");
             return;
         }
