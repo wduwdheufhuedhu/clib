@@ -17,7 +17,6 @@ public final class Board {
     private static final String OBJECTIVE_NAME = "sb";
     private static final String DUMMY_CRITERIA = "dummy";
 
-    /** 21 unique invisible entry keys built from Minecraft formatting codes. */
     private static final String[] ENTRY_KEYS;
 
     static {
