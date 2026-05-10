@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public final class CC {
+
+    private CC() {
+    }
 
     public static final String U = ChatColor.UNDERLINE.toString();
     public static final String BLUE = ChatColor.BLUE.toString();
@@ -97,6 +99,9 @@ public final class CC {
     public static final String U_AQUA = U + AQUA;
     public static final String U_DARK_AQUA = U + DARK_AQUA;
     private static final Pattern HEX_PATTERN = Pattern.compile("&#[A-Fa-f0-9]{6}");
+    private static final Pattern LEGACY_HEX_STRIP = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}");
+    private static final Pattern LEGACY_CODES_STRIP = Pattern.compile("(?i)[&§][0-9a-fk-orx]");
+    private static final Pattern INLINE_HEX_STRIP = Pattern.compile("(?i)&#[0-9a-f]{6}");
     public static String PRIMARY = YELLOW;
     public static String B_PRIMARY = PRIMARY + B;
     public static String SECONDARY = GOLD;
@@ -105,7 +110,9 @@ public final class CC {
     public static String B_TERTIARY = TERTIARY + B;
 
     public static String translate(String string) {
-        if (string == null) return null;
+        if (string == null) {
+            return null;
+        }
         String result = string
                 .replace("&p", PRIMARY)
                 .replace("&s", SECONDARY)
@@ -117,18 +124,36 @@ public final class CC {
         return ChatColor.translateAlternateColorCodes('&', translatedHex);
     }
 
+    /**
+     * Expands {@code &#RRGGBB} to the RGB legacy sequence understood by Minecraft 1.16+,
+     * using only {@link ChatColor} and plain strings so this stays compatible with Paper
+     * back to 1.8.8 (no BungeeCord {@code ChatColor.of} dependency at runtime).
+     */
+    private static String toLegacyHexMinecraft(String rgbHex6) {
+        StringBuilder sb = new StringBuilder(14).append(ChatColor.COLOR_CHAR).append('x');
+        for (int i = 0; i < rgbHex6.length(); i++) {
+            sb.append(ChatColor.COLOR_CHAR).append(rgbHex6.charAt(i));
+        }
+        return sb.toString();
+    }
+
     private static String translateHex(String message) {
         Matcher hexMatcher = HEX_PATTERN.matcher(message);
+        StringBuilder out = new StringBuilder(message.length() + 16);
         while (hexMatcher.find()) {
-            String hexColor = hexMatcher.group().substring(2);
-            message = message.replace(hexMatcher.group(), net.md_5.bungee.api.ChatColor.of("#" + hexColor).toString());
+            String full = hexMatcher.group();
+            String rgb = full.substring(2);
+            hexMatcher.appendReplacement(out, Matcher.quoteReplacement(toLegacyHexMinecraft(rgb)));
         }
-
-        return message;
+        hexMatcher.appendTail(out);
+        return out.toString();
     }
 
     public static List<String> translate(List<String> text) {
-        return text.stream().map(CC::translate).collect(Collectors.toList());
+        if (text == null) {
+            return null;
+        }
+        return text.stream().map(CC::translate).toList();
     }
 
     public static List<String> translate(String... text) {
@@ -136,10 +161,12 @@ public final class CC {
     }
 
     public static String stripAllColor(String input) {
-        if (input == null) return null;
-        input = input.replaceAll("(?i)&#[0-9a-f]{6}", "");
-        input = input.replaceAll("(?i)§x(§[0-9a-f]){6}", "");
-        input = input.replaceAll("(?i)[&§][0-9a-fk-or]", "");
+        if (input == null) {
+            return null;
+        }
+        input = INLINE_HEX_STRIP.matcher(input).replaceAll("");
+        input = LEGACY_HEX_STRIP.matcher(input).replaceAll("");
+        input = LEGACY_CODES_STRIP.matcher(input).replaceAll("");
         return ChatColor.stripColor(input);
     }
 
