@@ -5,7 +5,6 @@ import com.conaxgames.libraries.config.CommentedConfiguration;
 import com.conaxgames.libraries.config.Config;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,7 +13,6 @@ import java.io.InputStream;
 import java.util.List;
 
 @Getter
-@Setter
 public abstract class Module {
 
     private final LibraryPlugin library = LibraryPlugin.getInstance();
@@ -59,7 +57,7 @@ public abstract class Module {
         if (required == null || Bukkit.getPluginManager().isPluginEnabled(required)) {
             return true;
         }
-        library.getLibraryLogger().toConsole("ModuleManager",
+        library.getLibraryLogger().toConsole("Module",
                 "Required plugin " + required + " is missing. Module " + getIdentifier() + " cannot be registered.");
         return false;
     }
@@ -109,20 +107,22 @@ public abstract class Module {
         String dest = destination.replace(".yml", "");
         Config config = new Config("/modules/" + getIdentifier() + "/" + dest, javaPlugin);
 
-        InputStream fileStream = javaPlugin.getResource("modules/" + getIdentifier() + "/" + dest + ".yml");
-        if (fileStream == null) {
-            library.getLibraryLogger().toConsole("Module", "Input stream was null when attempting to getResource. (Id: " + getIdentifier() + ", JavaPlugin: " + javaPlugin.getName() + ")");
-            return config;
-        }
+        try (InputStream fileStream = javaPlugin.getResource("modules/" + getIdentifier() + "/" + dest + ".yml")) {
+            if (fileStream == null) {
+                library.getLibraryLogger().toConsole("Module", "Input stream was null when attempting to getResource. (Id: " + getIdentifier() + ", JavaPlugin: " + javaPlugin.getName() + ")");
+                return config;
+            }
 
-        if (forceSync || (config.isWasCreated() && syncOnCreation)) {
-            try {
-                String[] dontSync = (noSync() == null ? new String[0] : noSync().toArray(new String[0]));
-                CommentedConfiguration commentedConfiguration = CommentedConfiguration.loadConfiguration(config.getConfigFile());
-                commentedConfiguration.syncWithConfig(config.getConfigFile(), fileStream, dontSync);
-                library.getLibraryLogger().toConsole("Module", "Sync'd " + "/modules/" + getIdentifier() + "/" + dest + ".yml" + " with config.");
-            } catch (Exception exception) {
-                library.getLibraryLogger().toConsole("Module", "Unable to sync " + "/modules/" + getIdentifier() + "/" + dest + ".yml" + " with config.", exception);
+            if (forceSync || (config.isWasCreated() && syncOnCreation)) {
+                try {
+                    List<String> skip = noSync();
+                    String[] dontSync = skip == null ? new String[0] : skip.toArray(new String[0]);
+                    CommentedConfiguration commentedConfiguration = CommentedConfiguration.loadConfiguration(config.getConfigFile());
+                    commentedConfiguration.syncWithConfig(config.getConfigFile(), fileStream, dontSync);
+                    library.getLibraryLogger().toConsole("Module", "Synced /modules/" + getIdentifier() + "/" + dest + ".yml with config.");
+                } catch (Exception exception) {
+                    library.getLibraryLogger().toConsole("Module", "Unable to sync /modules/" + getIdentifier() + "/" + dest + ".yml with config.", exception);
+                }
             }
         }
 

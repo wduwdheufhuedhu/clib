@@ -4,13 +4,13 @@ import co.aikar.commands.PaperCommandManager;
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.module.type.Module;
 import lombok.Getter;
-import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
@@ -38,22 +38,23 @@ public class ModuleManager {
         }
 
         String id = module.getIdentifier().toLowerCase();
-        if (!modules.containsKey(id)) {
-            modules.put(id, new ModuleState(module, false));
-            if (module.isConfiguredToEnable()) {
-                enableModule(module, false);
-            } else {
-                setupModule(module);
-            }
+        if (modules.containsKey(id)) {
+            return;
         }
 
-        String message = "Registered " + module.getIdentifier() + "!";
-        library.getLibraryLogger().toConsole("ModuleManager", message);
+        modules.put(id, new ModuleState(module, false));
+        if (module.isConfiguredToEnable()) {
+            enableModule(module, false);
+        } else {
+            setupModule(module);
+        }
+
+        library.getLibraryLogger().toConsole("ModuleManager", "Registered " + module.getIdentifier() + "!");
     }
 
     public String enableModule(Module module, boolean save) {
-        Validate.notNull(module, "Module can not be null");
-        Validate.notNull(module.getIdentifier(), "Identifier can not be null");
+        Objects.requireNonNull(module, "Module can not be null");
+        Objects.requireNonNull(module.getIdentifier(), "Identifier can not be null");
 
         String id = module.getIdentifier().toLowerCase();
         if (!modules.containsKey(id)) {
@@ -79,7 +80,7 @@ public class ModuleManager {
     }
 
     public String disableModule(Module module, boolean save) {
-        Validate.notNull(module, "Module cannot be null");
+        Objects.requireNonNull(module, "Module cannot be null");
         String id = module.getIdentifier().toLowerCase();
         ModuleState state = modules.get(id);
         if (state == null) {
@@ -125,14 +126,13 @@ public class ModuleManager {
 
     private boolean setModuleEnabled(Module module) {
         try {
-            if (module instanceof Listener) {
-                Bukkit.getPluginManager().registerEvents((Listener) module, module.getJavaPlugin());
+            if (module instanceof Listener listener) {
+                Bukkit.getPluginManager().registerEvents(listener, module.getJavaPlugin());
             }
             module.onEnable();
             return true;
         } catch (Throwable t) {
-            library.getLibraryLogger().toConsole("ModuleManager", "Failed to enable module " + module.getName());
-            t.printStackTrace();
+            library.getLibraryLogger().toConsole("ModuleManager", "Failed to enable module " + module.getName(), t);
             return false;
         }
     }
@@ -140,13 +140,12 @@ public class ModuleManager {
     private boolean setModuleDisabled(Module module) {
         try {
             module.onDisable();
-            if (module instanceof Listener) {
-                HandlerList.unregisterAll((Listener) module);
+            if (module instanceof Listener listener) {
+                HandlerList.unregisterAll(listener);
             }
             return true;
         } catch (Throwable t) {
-            library.getLibraryLogger().toConsole("ModuleManager", "Failed to disable module " + module.getName());
-            t.printStackTrace();
+            library.getLibraryLogger().toConsole("ModuleManager", "Failed to disable module " + module.getName(), t);
             return false;
         }
     }

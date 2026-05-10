@@ -23,8 +23,8 @@ public class ModuleCommands extends BaseCommand {
     @Description("Open the module management menu or lists the registered modules.")
     @CommandCompletion("@modules")
     public void onList(CommandSender sender) {
-        if (sender instanceof Player) {
-            new ModuleMenu(moduleManager).openMenu((Player) sender);
+        if (sender instanceof Player player) {
+            new ModuleMenu(moduleManager).openMenu(player);
         } else {
             moduleManager.getModules().keySet().forEach(sender::sendMessage);
         }
