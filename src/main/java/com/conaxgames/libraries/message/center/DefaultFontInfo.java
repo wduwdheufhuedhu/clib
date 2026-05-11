@@ -1,4 +1,4 @@
-package com.conaxgames.libraries.util.center;
+package com.conaxgames.libraries.message.center;
 
 public enum DefaultFontInfo {
 

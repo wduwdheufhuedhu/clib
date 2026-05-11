@@ -2,7 +2,7 @@ package com.conaxgames.libraries.menu.buttons;
 
 import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.message.FormatUtil;
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.ColorMaterialUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

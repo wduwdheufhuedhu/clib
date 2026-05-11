@@ -4,7 +4,7 @@ import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.menu.Menu;
 import com.conaxgames.libraries.menu.buttons.BackButton;
 import com.conaxgames.libraries.menu.pagination.buttons.JumpToPageButton;
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;

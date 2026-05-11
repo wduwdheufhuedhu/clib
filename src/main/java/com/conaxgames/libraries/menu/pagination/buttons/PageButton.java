@@ -5,7 +5,7 @@ import com.conaxgames.libraries.event.impl.menu.MenuButtonPreviousEvent;
 import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.menu.pagination.PaginatedMenu;
 import com.conaxgames.libraries.menu.pagination.ViewAllPagesMenu;
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

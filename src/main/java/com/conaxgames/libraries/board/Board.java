@@ -1,7 +1,7 @@
 package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.LibraryPlugin;
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.VersioningChecker;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;

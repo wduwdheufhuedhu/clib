@@ -1,6 +1,6 @@
 package com.conaxgames.libraries.debug;
 
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;

@@ -1,4 +1,4 @@
-package com.conaxgames.libraries.util;
+package com.conaxgames.libraries.message;
 
 import com.google.common.base.Strings;
 
