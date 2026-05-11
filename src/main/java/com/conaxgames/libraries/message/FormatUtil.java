@@ -2,8 +2,6 @@ package com.conaxgames.libraries.message;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 public final class FormatUtil {
@@ -11,17 +9,6 @@ public final class FormatUtil {
     private static final char SECTION = '\u00a7';
     private static final Pattern FORMATTING = Pattern.compile("^.*(?<format>(" + SECTION + "[0-9a-fklmor])+).*");
     private static final Pattern FORMAT_CODES = Pattern.compile("(" + SECTION + "|&)[0-9a-fklmor]");
-
-    private static final NavigableMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
-    static {
-        ROMAN_NUMERALS.put(1000, "M"); ROMAN_NUMERALS.put(900, "CM");
-        ROMAN_NUMERALS.put(500, "D");  ROMAN_NUMERALS.put(400, "CD");
-        ROMAN_NUMERALS.put(100, "C");  ROMAN_NUMERALS.put(90, "XC");
-        ROMAN_NUMERALS.put(50, "L");   ROMAN_NUMERALS.put(40, "XL");
-        ROMAN_NUMERALS.put(10, "X");   ROMAN_NUMERALS.put(9, "IX");
-        ROMAN_NUMERALS.put(5, "V");    ROMAN_NUMERALS.put(4, "IV");
-        ROMAN_NUMERALS.put(1, "I");    ROMAN_NUMERALS.put(0, "");
-    }
 
     private FormatUtil() {}
 
@@ -61,13 +48,6 @@ public final class FormatUtil {
         }
         words.add(applyFormat(format, s.substring(start).trim()));
         return words;
-    }
-
-    public static String toRoman(int number) {
-        if (number <= 0) return "";
-        int key = ROMAN_NUMERALS.floorKey(number);
-        if (number == key) return ROMAN_NUMERALS.get(key);
-        return ROMAN_NUMERALS.get(key) + toRoman(number - key);
     }
 
     private static String applyFormat(String format, String text) {
