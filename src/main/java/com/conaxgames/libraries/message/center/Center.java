@@ -3,45 +3,37 @@ package com.conaxgames.libraries.message.center;
 import com.conaxgames.libraries.message.CC;
 import org.bukkit.entity.Player;
 
-public class Center {
+public final class Center {
 
-    private final static int CENTER_PX = 154;
+    private static final int CENTER_PX = 154;
+    private static final int SPACE_WIDTH = DefaultFontInfo.SPACE.getLength() + 1;
+
+    private Center() {}
 
     public static String getCentered(String message) {
-        if (message == null || message.isEmpty()) {
-            return message;
-        }
+        if (message == null || message.isEmpty()) return message;
 
-        message = CC.translate(message);
-
-        int messagePxSize = 0;
+        var translated = CC.translate(message);
+        int messagePx = 0;
         boolean previousCode = false;
         boolean isBold = false;
 
-        for (char c : message.toCharArray()) {
-            if (c == '§') {
+        for (int i = 0; i < translated.length(); i++) {
+            char c = translated.charAt(i);
+            if (c == '\u00a7') {
                 previousCode = true;
             } else if (previousCode) {
                 previousCode = false;
                 isBold = c == 'l' || c == 'L';
             } else {
-                DefaultFontInfo dFI = DefaultFontInfo.getDefaultFontInfo(c);
-                messagePxSize += isBold ? dFI.getBoldLength() : dFI.getLength();
-                messagePxSize++;
+                var font = DefaultFontInfo.getDefaultFontInfo(c);
+                messagePx += isBold ? font.getBoldLength() : font.getLength();
+                messagePx++;
             }
         }
 
-        int halvedMessageSize = messagePxSize / 2;
-        int toCompensate = CENTER_PX - halvedMessageSize;
-        int spaceLength = DefaultFontInfo.SPACE.getLength() + 1;
-        int compensated = 0;
-        StringBuilder sb = new StringBuilder();
-        while (compensated < toCompensate) {
-            sb.append(" ");
-            compensated += spaceLength;
-        }
-
-        return sb + message;
+        int padding = (CENTER_PX - messagePx / 2) / SPACE_WIDTH;
+        return " ".repeat(Math.max(0, padding)) + translated;
     }
 
     public static void sendCenteredMessage(Player player, String message) {

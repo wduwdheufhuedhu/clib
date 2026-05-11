@@ -9,8 +9,7 @@ import java.util.regex.Pattern;
 
 public final class CC {
 
-    private CC() {
-    }
+    private CC() {}
 
     public static final String U = ChatColor.UNDERLINE.toString();
     public static final String BLUE = ChatColor.BLUE.toString();
@@ -98,10 +97,12 @@ public final class CC {
     public static final String U_AQUA = U + AQUA;
     public static final String U_DARK_AQUA = U + DARK_AQUA;
 
-    private static final Pattern HEX_PATTERN = Pattern.compile("&#[A-Fa-f0-9]{6}");
+    private static final char SECTION = ChatColor.COLOR_CHAR;
+    private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
     private static final Pattern LEGACY_HEX_STRIP = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}");
     private static final Pattern LEGACY_CODES_STRIP = Pattern.compile("(?i)[&§][0-9a-fk-orx]");
     private static final Pattern INLINE_HEX_STRIP = Pattern.compile("(?i)&#[0-9a-f]{6}");
+
     public static String PRIMARY = YELLOW;
     public static String B_PRIMARY = PRIMARY + B;
     public static String SECONDARY = GOLD;
@@ -110,62 +111,49 @@ public final class CC {
     public static String B_TERTIARY = TERTIARY + B;
 
     public static String translate(String string) {
-        if (string == null) {
-            return null;
-        }
-        String result = string
-                .replace("&p", PRIMARY)
-                .replace("&s", SECONDARY)
-                .replace("&t", TERTIARY)
-                .replace("&P", PRIMARY)
-                .replace("&S", SECONDARY)
-                .replace("&T", TERTIARY);
-        String translatedHex = translateHex(result);
-        return ChatColor.translateAlternateColorCodes('&', translatedHex);
-    }
+        if (string == null) return null;
 
-    private static String toLegacyHexMinecraft(String rgbHex6) {
-        StringBuilder sb = new StringBuilder(14).append(ChatColor.COLOR_CHAR).append('x');
-        for (int i = 0; i < rgbHex6.length(); i++) {
-            sb.append(ChatColor.COLOR_CHAR).append(rgbHex6.charAt(i));
-        }
-        return sb.toString();
-    }
+        var result = string
+                .replace("&p", PRIMARY).replace("&P", PRIMARY)
+                .replace("&s", SECONDARY).replace("&S", SECONDARY)
+                .replace("&t", TERTIARY).replace("&T", TERTIARY);
 
-    private static String translateHex(String message) {
-        Matcher hexMatcher = HEX_PATTERN.matcher(message);
-        StringBuilder out = new StringBuilder(message.length() + 16);
-        while (hexMatcher.find()) {
-            String rgb = hexMatcher.group().substring(2);
-            hexMatcher.appendReplacement(out, Matcher.quoteReplacement(toLegacyHexMinecraft(rgb)));
-        }
-        hexMatcher.appendTail(out);
-        return out.toString();
+        return ChatColor.translateAlternateColorCodes('&', translateHex(result));
     }
 
     public static List<String> translate(List<String> text) {
-        if (text == null) {
-            return null;
-        }
+        if (text == null) return null;
         return text.stream().map(CC::translate).toList();
     }
 
     public static List<String> translate(String... text) {
-        return translate(Arrays.asList(text));
+        return Arrays.stream(text).map(CC::translate).toList();
     }
 
     public static String stripAllColor(String input) {
-        if (input == null) {
-            return null;
-        }
-        input = INLINE_HEX_STRIP.matcher(input).replaceAll("");
-        input = LEGACY_HEX_STRIP.matcher(input).replaceAll("");
-        input = LEGACY_CODES_STRIP.matcher(input).replaceAll("");
-        return ChatColor.stripColor(input);
+        if (input == null) return null;
+        var stripped = INLINE_HEX_STRIP.matcher(input).replaceAll("");
+        stripped = LEGACY_HEX_STRIP.matcher(stripped).replaceAll("");
+        stripped = LEGACY_CODES_STRIP.matcher(stripped).replaceAll("");
+        return ChatColor.stripColor(stripped);
     }
 
     public static String getLastColors(String input) {
         return ChatColor.getLastColors(input);
     }
 
+    private static String translateHex(String message) {
+        var matcher = HEX_PATTERN.matcher(message);
+        var out = new StringBuilder(message.length() + 16);
+        while (matcher.find()) {
+            var rgb = matcher.group(1);
+            var hex = new StringBuilder(14).append(SECTION).append('x');
+            for (int i = 0; i < 6; i++) {
+                hex.append(SECTION).append(rgb.charAt(i));
+            }
+            matcher.appendReplacement(out, Matcher.quoteReplacement(hex.toString()));
+        }
+        matcher.appendTail(out);
+        return out.toString();
+    }
 }

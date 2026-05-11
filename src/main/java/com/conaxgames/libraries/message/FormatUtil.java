@@ -1,50 +1,43 @@
 package com.conaxgames.libraries.message;
 
-import com.google.common.base.Joiner;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.StringJoiner;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public enum FormatUtil {
-    ;
-    private static final Pattern FORMATTING = Pattern.compile("^.*(?<format>(\u00a7[0-9a-fklmor])+).*");
-    private final static TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
+public final class FormatUtil {
 
+    private static final char SECTION = '\u00a7';
+    private static final Pattern FORMATTING = Pattern.compile("^.*(?<format>(" + SECTION + "[0-9a-fklmor])+).*");
+    private static final Pattern FORMAT_CODES = Pattern.compile("(" + SECTION + "|&)[0-9a-fklmor]");
+
+    private static final NavigableMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
     static {
-        ROMAN_NUMERALS.put(1000, "M");
-        ROMAN_NUMERALS.put(900, "CM");
-        ROMAN_NUMERALS.put(500, "D");
-        ROMAN_NUMERALS.put(400, "CD");
-        ROMAN_NUMERALS.put(100, "C");
-        ROMAN_NUMERALS.put(90, "XC");
-        ROMAN_NUMERALS.put(50, "L");
-        ROMAN_NUMERALS.put(40, "XL");
-        ROMAN_NUMERALS.put(10, "X");
-        ROMAN_NUMERALS.put(9, "IX");
-        ROMAN_NUMERALS.put(5, "V");
-        ROMAN_NUMERALS.put(4, "IV");
-        ROMAN_NUMERALS.put(1, "I");
-        ROMAN_NUMERALS.put(0, "");
+        ROMAN_NUMERALS.put(1000, "M"); ROMAN_NUMERALS.put(900, "CM");
+        ROMAN_NUMERALS.put(500, "D");  ROMAN_NUMERALS.put(400, "CD");
+        ROMAN_NUMERALS.put(100, "C");  ROMAN_NUMERALS.put(90, "XC");
+        ROMAN_NUMERALS.put(50, "L");   ROMAN_NUMERALS.put(40, "XL");
+        ROMAN_NUMERALS.put(10, "X");   ROMAN_NUMERALS.put(9, "IX");
+        ROMAN_NUMERALS.put(5, "V");    ROMAN_NUMERALS.put(4, "IV");
+        ROMAN_NUMERALS.put(1, "I");    ROMAN_NUMERALS.put(0, "");
     }
 
+    private FormatUtil() {}
+
     public static String stripFormatting(String format) {
-        if (format == null || format.trim().isEmpty()) {
-            return "";
-        }
-        return format.replaceAll("(\u00a7|&)[0-9a-fklmor]", "");
+        if (format == null || format.isBlank()) return "";
+        return FORMAT_CODES.matcher(format).replaceAll("");
     }
 
     public static String normalize(String format) {
-        if (format == null || format.trim().isEmpty()) {
-            return "";
-        }
-        return format.replaceAll("(\u00a7|&)([0-9a-fklmor])", "\u00a7$2");
+        if (format == null || format.isBlank()) return "";
+        return format.replaceAll("(" + SECTION + "|&)([0-9a-fklmor])", SECTION + "$2");
     }
 
     public static List<String> wordWrap(String s) {
@@ -56,133 +49,88 @@ public enum FormatUtil {
     }
 
     public static List<String> wordWrap(String s, int firstSegment, int lineSize) {
-        String format = getFormat(s);
-        if (format == null || !s.startsWith(format)) {
-            format = "";
-        }
-        List<String> words = new ArrayList<>();
+        var format = getFormatPrefix(s);
+        var words = new ArrayList<String>();
         int numChars = firstSegment;
+        int start = 0;
         int ix = 0;
-        int jx = 0;
+
         while (ix < s.length()) {
             ix = s.indexOf(' ', ix + 1);
-            if (ix != -1) {
-                String subString = s.substring(jx, ix).trim();
-                String f = getFormat(subString);
-                int chars = stripFormatting(subString).length() + 1;
-                if (chars >= numChars) {
-                    if (f != null && subString.startsWith(f)) {
-                        format = f;
-                    }
-                    if (!subString.isEmpty()) {
-                        words.add(withFormat(format, subString));
-                        numChars = lineSize;
-                        jx = ix + 1;
-                    }
-                }
-            } else {
-                break;
+            if (ix == -1) break;
+
+            var sub = s.substring(start, ix).trim();
+            int visibleLen = stripFormatting(sub).length() + 1;
+            if (visibleLen >= numChars && !sub.isEmpty()) {
+                var f = getFormatPrefix(sub);
+                if (f != null && sub.startsWith(f)) format = f;
+                words.add(applyFormat(format, sub));
+                numChars = lineSize;
+                start = ix + 1;
             }
         }
-        words.add(withFormat(format, s.substring(jx).trim()));
+        words.add(applyFormat(format, s.substring(start).trim()));
         return words;
     }
 
     public static List<String> wordWrapStrict(String s, int lineLength) {
-        List<String> lines = new ArrayList<>();
-        String format = getFormat(s);
-        if (format == null || !s.startsWith(format)) {
-            format = "";
-        }
-        String[] words = s.split(" ");
-        String line = "";
-        for (String word : words) {
-            String test = stripFormatting(line + " " + word).trim();
-            if (test.length() <= lineLength) {
+        var lines = new ArrayList<String>();
+        var format = getFormatPrefix(s);
+        if (format == null || !s.startsWith(format)) format = "";
 
-                line += (line.isEmpty() ? "" : " ") + word;
-            } else if (line.isEmpty() || stripFormatting(word).length() > lineLength) {
-
-                String f = getFormat(word);
-                String strip = stripFormatting(word);
-                do {
-                    int len = Math.min(strip.length(), lineLength - line.length() - 1);
-                    lines.add(withFormat(format, line + (line.isEmpty() ? "" : " ") + strip.substring(0, len)));
-                    strip = strip.substring(len);
-                    if (f != null) {
-                        format = f;
-                    }
-                } while (strip.length() > lineLength);
-                line = strip;
-            } else {
-
-                lines.add(withFormat(format, line));
-                String f = getFormat(line);
-                if (f != null) {
-                    format = f;
+        var sb = new StringBuilder();
+        for (var word : s.split(" ")) {
+            var testLine = stripFormatting(sb + " " + word).trim();
+            if (testLine.length() <= lineLength) {
+                if (!sb.isEmpty()) sb.append(' ');
+                sb.append(word);
+            } else if (sb.isEmpty() || stripFormatting(word).length() > lineLength) {
+                var f = getFormatPrefix(word);
+                var stripped = stripFormatting(word);
+                while (!stripped.isEmpty()) {
+                    int take = Math.min(stripped.length(), lineLength - (sb.isEmpty() ? 0 : sb.length() + 1));
+                    if (!sb.isEmpty()) sb.append(' ');
+                    sb.append(stripped, 0, take);
+                    lines.add(applyFormat(format, sb.toString()));
+                    sb.setLength(0);
+                    stripped = stripped.substring(take);
+                    if (f != null) format = f;
                 }
-                line = word;
+            } else {
+                lines.add(applyFormat(format, sb.toString()));
+                var f = getFormatPrefix(sb.toString());
+                if (f != null) format = f;
+                sb.setLength(0);
+                sb.append(word);
             }
         }
-        if (!line.isEmpty()) {
-            lines.add(withFormat(format, line));
+        if (!sb.isEmpty()) {
+            lines.add(applyFormat(format, sb.toString()));
         }
         return lines;
     }
 
-    private static String withFormat(String format, String subString) {
-        String sf = null;
-        if (!subString.startsWith("\u00a7")) {
-            sf = format + subString;
-        } else {
-            sf = subString;
-        }
-        return sf;
-    }
-
-    private static String getFormat(String s) {
-        Matcher m = FORMATTING.matcher(s);
-        String format = null;
-        if (m.matches() && m.group("format") != null) {
-            format = m.group("format");
-        }
-        return format;
-    }
-
     public static String join(List<String> list, String separator) {
-        String joined = "";
-        for (String s : list) {
-            joined += s + separator;
-        }
-        joined = !list.isEmpty() ? joined.substring(0, joined.length() - separator.length()) : joined;
-        return joined;
+        return String.join(separator, list);
     }
 
     public static List<String> prefix(List<String> list, String prefix) {
-        List<String> prefixed = new ArrayList<>(list.size());
-        for (String s : list) {
-            prefixed.add(prefix + s);
-        }
-        return prefixed;
+        return list.stream().map(s -> prefix + s).toList();
     }
 
     public static String camelcase(String name) {
-        if (name == null || name.isEmpty()) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String part : name.split("[ _]")) {
+        if (name == null || name.isEmpty()) return "";
+        var sb = new StringBuilder(name.length());
+        for (var part : name.split("[ _]")) {
+            if (part.isEmpty()) continue;
             sb.append(Character.toUpperCase(part.charAt(0)));
-            sb.append(part.substring(1).toLowerCase());
+            if (part.length() > 1) sb.append(part.substring(1).toLowerCase());
         }
         return sb.toString();
     }
 
     public static String escape(String formatString) {
-        String escaped = normalize(formatString);
-        escaped = escaped
-                .replaceAll("\u00a7", "&");
-        return escaped;
+        return normalize(formatString).replace(SECTION, '&');
     }
 
     public static String possessiveString(String str) {
@@ -190,19 +138,16 @@ public enum FormatUtil {
     }
 
     public static String formatTps(double tps) {
-        double roundedTps = Math.min(tps, 20.0);
-        ChatColor color = (tps > 18.0) ? ChatColor.GREEN : (tps > 16.0) ? ChatColor.YELLOW : ChatColor.RED;
-        String asterisk = (tps > 20.0) ? "*" : "";
-
-        return color + asterisk + String.format("%.2f", roundedTps);
+        double clamped = Math.min(tps, 20.0);
+        var color = tps > 18.0 ? ChatColor.GREEN : tps > 16.0 ? ChatColor.YELLOW : ChatColor.RED;
+        return color + (tps > 20.0 ? "*" : "") + "%.2f".formatted(clamped);
     }
 
     public static String toRoman(int number) {
-        int l = ROMAN_NUMERALS.floorKey(number);
-        if (number == l) {
-            return ROMAN_NUMERALS.get(number);
-        }
-        return ROMAN_NUMERALS.get(l) + toRoman(number - l);
+        if (number <= 0) return "";
+        int key = ROMAN_NUMERALS.floorKey(number);
+        if (number == key) return ROMAN_NUMERALS.get(key);
+        return ROMAN_NUMERALS.get(key) + toRoman(number - key);
     }
 
     public static String getItemName(ItemStack item) {
@@ -214,16 +159,25 @@ public enum FormatUtil {
     }
 
     public static String andJoin(Collection<String> collection, boolean delimiterBeforeAnd, String delimiter) {
-        if (collection == null || collection.isEmpty()) {
-            return "";
-        }
-        List<String> contents = new ArrayList<String>(collection);
-        String last = contents.remove(contents.size() - 1);
-        StringBuilder builder = new StringBuilder(Joiner.on(delimiter).join(contents));
-        if (delimiterBeforeAnd) {
-            builder.append(delimiter);
-        }
-        return builder.append((collection.size() <= 1 ? "" : " and ")).append(last).toString();
+        if (collection == null || collection.isEmpty()) return "";
+        var contents = new ArrayList<>(collection);
+        var last = contents.removeLast();
+        if (contents.isEmpty()) return last;
+
+        var joiner = new StringJoiner(delimiter);
+        contents.forEach(joiner::add);
+        var sb = new StringBuilder(joiner.toString());
+        if (delimiterBeforeAnd) sb.append(delimiter);
+        return sb.append(" and ").append(last).toString();
     }
 
+    private static String applyFormat(String format, String text) {
+        return (format != null && !text.startsWith(String.valueOf(SECTION))) ? format + text : text;
+    }
+
+    private static String getFormatPrefix(String s) {
+        if (s == null) return null;
+        var m = FORMATTING.matcher(s);
+        return m.matches() ? m.group("format") : null;
+    }
 }
