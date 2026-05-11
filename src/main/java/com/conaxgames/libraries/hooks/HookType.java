@@ -9,8 +9,8 @@ public enum HookType {
 
     PLACEHOLDERAPI,
     VAULT,
-    TITLE_MANAGER,
-    WORLD_GUARD,
+    TITLEMANAGER,
+    WORLDGUARD,
     PROTOCOLLIB,
     CMI,
     TAB,
@@ -29,21 +29,17 @@ public enum HookType {
     CGLOBE,
     SKYBLOCK;
 
-    private static final Map<String, HookType> BY_NORMALIZED_NAME;
+    private static final Map<String, HookType> BY_NAME;
 
     static {
         HashMap<String, HookType> map = new HashMap<>();
         for (HookType type : values()) {
-            map.put(normalize(type.name()), type);
+            map.put(type.name().toLowerCase(Locale.ROOT), type);
         }
-        BY_NORMALIZED_NAME = Map.copyOf(map);
-    }
-
-    private static String normalize(String name) {
-        return name.toLowerCase(Locale.ROOT).replace("_", "");
+        BY_NAME = Map.copyOf(map);
     }
 
     public static Optional<HookType> fromPluginName(String name) {
-        return Optional.ofNullable(BY_NORMALIZED_NAME.get(normalize(name)));
+        return Optional.ofNullable(BY_NAME.get(name.toLowerCase(Locale.ROOT)));
     }
 }
