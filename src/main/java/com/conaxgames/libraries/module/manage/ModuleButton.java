@@ -3,7 +3,7 @@ package com.conaxgames.libraries.module.manage;
 import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.message.FormatUtil;
 import com.conaxgames.libraries.module.ModuleManager;
-import com.conaxgames.libraries.module.type.Module;
+import com.conaxgames.libraries.module.Module;
 import com.conaxgames.libraries.message.CC;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;

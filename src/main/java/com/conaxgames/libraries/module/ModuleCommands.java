@@ -4,7 +4,6 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import com.conaxgames.libraries.module.manage.ModuleMenu;
-import com.conaxgames.libraries.module.type.Module;
 import com.conaxgames.libraries.message.CC;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
