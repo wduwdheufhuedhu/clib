@@ -7,49 +7,43 @@ import java.util.Optional;
 
 public enum HookType {
 
-    PLACEHOLDERAPI("PlaceholderAPI"),
-    VAULT("Vault"),
-    TITLE_MANAGER("TitleManager"),
-    WORLD_GUARD("WorldGuard"),
-    PROTOCOLLIB("ProtocolLib"),
-    CMI("CMI"),
-    TAB("TAB"),
-    LUCKPERMS("LuckPerms"),
-    CITIZENS("Citizens"),
+    PLACEHOLDERAPI,
+    VAULT,
+    TITLE_MANAGER,
+    WORLD_GUARD,
+    PROTOCOLLIB,
+    CMI,
+    TAB,
+    LUCKPERMS,
+    CITIZENS,
 
-    CSUITE("cSuite"),
-    CMIGRATION("cMigration"),
-    ANTICRASH("AntiCrash"),
-    ARENAPVP("ArenaPvP"),
-    UHC("UHC"),
-    MANGO("Mango"),
-    HCF("HCF"),
-    KITPVP("KitPvP"),
-    FFA("FFA"),
-    CGLOBE("cGlobe"),
-    SKYBLOCK("Skyblock");
+    CSUITE,
+    CMIGRATION,
+    ANTICRASH,
+    ARENAPVP,
+    UHC,
+    MANGO,
+    HCF,
+    KITPVP,
+    FFA,
+    CGLOBE,
+    SKYBLOCK;
 
-    private static final Map<String, HookType> BY_PLUGIN_NAME;
+    private static final Map<String, HookType> BY_NORMALIZED_NAME;
 
     static {
         HashMap<String, HookType> map = new HashMap<>();
         for (HookType type : values()) {
-            map.put(type.pluginName.toLowerCase(Locale.ROOT), type);
+            map.put(normalize(type.name()), type);
         }
-        BY_PLUGIN_NAME = Map.copyOf(map);
+        BY_NORMALIZED_NAME = Map.copyOf(map);
     }
 
-    private final String pluginName;
-
-    HookType(String pluginName) {
-        this.pluginName = pluginName;
-    }
-
-    public String pluginName() {
-        return pluginName;
+    private static String normalize(String name) {
+        return name.toLowerCase(Locale.ROOT).replace("_", "");
     }
 
     public static Optional<HookType> fromPluginName(String name) {
-        return Optional.ofNullable(BY_PLUGIN_NAME.get(name.toLowerCase(Locale.ROOT)));
+        return Optional.ofNullable(BY_NORMALIZED_NAME.get(normalize(name)));
     }
 }
