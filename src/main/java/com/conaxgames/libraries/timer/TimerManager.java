@@ -7,12 +7,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * Registry that holds all active {@link Timer} instances.
- *
- * <p>Timers that implement {@link Listener} are automatically
- * registered with the Bukkit event bus on {@link #registerTimer}.
- */
 public final class TimerManager {
 
     private final Set<Timer> timers = new LinkedHashSet<>();

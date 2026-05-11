@@ -9,10 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-/**
- * Fired when a new cooldown is about to start on a {@link Timer}.
- * Cancelling this event prevents the cooldown from being applied.
- */
 public final class TimerStartEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();

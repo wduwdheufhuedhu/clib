@@ -14,13 +14,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongPredicate;
 
-/**
- * A {@link Timer} that tracks per-player cooldowns backed by
- * {@link TimerCooldown} instances in a {@link ConcurrentHashMap}.
- *
- * <p>{@code non-sealed} so downstream code can provide concrete
- * timer implementations (e.g. combat tag, enderpearl cooldown).
- */
 public non-sealed abstract class PlayerTimer extends Timer {
 
     private final Map<UUID, TimerCooldown> cooldowns = new ConcurrentHashMap<>();
@@ -32,8 +25,6 @@ public non-sealed abstract class PlayerTimer extends Timer {
     protected void handleExpiry(@Nullable Player player, UUID playerUUID) {
         cooldowns.remove(playerUUID);
     }
-
-    // -- clear -----------------------------------------------------------
 
     public TimerCooldown clearCooldown(UUID playerUUID) {
         return clearCooldown(null, playerUUID);
@@ -51,8 +42,6 @@ public non-sealed abstract class PlayerTimer extends Timer {
         }
         return cooldown;
     }
-
-    // -- pause -----------------------------------------------------------
 
     public boolean isPaused(Player player) {
         return isPaused(player.getUniqueId());
@@ -74,8 +63,6 @@ public non-sealed abstract class PlayerTimer extends Timer {
         }
     }
 
-    // -- remaining -------------------------------------------------------
-
     public long getRemaining(Player player) {
         return getRemaining(player.getUniqueId());
     }
@@ -84,8 +71,6 @@ public non-sealed abstract class PlayerTimer extends Timer {
         var cooldown = cooldowns.get(playerUUID);
         return cooldown == null ? 0L : cooldown.getRemaining();
     }
-
-    // -- set cooldown ----------------------------------------------------
 
     public boolean setCooldown(Player player, UUID playerUUID) {
         return setCooldown(player, playerUUID, getDefaultCooldown(), false);
@@ -133,13 +118,9 @@ public non-sealed abstract class PlayerTimer extends Timer {
         return true;
     }
 
-    // -- access ----------------------------------------------------------
-
     public Map<UUID, TimerCooldown> getCooldowns() {
         return cooldowns;
     }
-
-    // -- internal --------------------------------------------------------
 
     private static void dispatch(Event event) {
         LibraryPlugin.getInstance().getPlugin().getServer().getPluginManager().callEvent(event);

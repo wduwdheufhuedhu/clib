@@ -9,10 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-/**
- * Fired when an existing cooldown is about to be extended or overwritten.
- * Cancelling this event preserves the original duration.
- */
 public final class TimerExtendEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();

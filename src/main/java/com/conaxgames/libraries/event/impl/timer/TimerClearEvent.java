@@ -9,10 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-/**
- * Fired after a cooldown has been explicitly cleared (not expired naturally).
- * Not cancellable — the cooldown is already removed when this event fires.
- */
 public final class TimerClearEvent extends Event {
 
     private static final HandlerList HANDLERS = new HandlerList();
@@ -27,11 +23,6 @@ public final class TimerClearEvent extends Event {
         this.timer = timer;
     }
 
-    /**
-     * Returns the affected player, resolving from UUID if not
-     * supplied at construction time.  May return {@code null}
-     * if the player is offline.
-     */
     public @Nullable Player getPlayer() {
         if (player == null && userUUID != null) {
             player = LibraryPlugin.getInstance().getPlugin().getServer().getPlayer(userUUID);

@@ -6,13 +6,6 @@ import com.conaxgames.libraries.util.scheduler.Scheduler;
 
 import java.util.UUID;
 
-/**
- * Represents a single active cooldown for one player under one {@link Timer}.
- *
- * <p>Tracks an expiry instant (epoch-millis) and optionally a paused
- * snapshot of the remaining time.  A scheduled task fires the
- * {@link TimerExpireEvent} when the cooldown elapses naturally.
- */
 public class TimerCooldown {
 
     private final Timer timer;
@@ -28,8 +21,6 @@ public class TimerCooldown {
         setRemaining(duration);
     }
 
-    // -- public read access ----------------------------------------------
-
     public Timer getTimer() {
         return timer;
     }
@@ -41,8 +32,6 @@ public class TimerCooldown {
     public long getRemaining() {
         return getRemaining(false);
     }
-
-    // -- package-private mutation ----------------------------------------
 
     void setRemaining(long milliseconds) {
         if (milliseconds <= 0L) {
@@ -97,8 +86,6 @@ public class TimerCooldown {
             scheduledTask = null;
         }
     }
-
-    // -- internal --------------------------------------------------------
 
     private void expire() {
         if (timer instanceof PlayerTimer playerTimer) {

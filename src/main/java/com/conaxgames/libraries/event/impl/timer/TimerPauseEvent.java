@@ -8,10 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-/**
- * Fired when a cooldown's paused state is about to change.
- * Cancelling this event keeps the previous paused state.
- */
 public final class TimerPauseEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
