@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 @Getter
+@Deprecated(forRemoval = true)
 public class JedisConnection {
 
     @Getter

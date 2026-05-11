@@ -7,6 +7,7 @@ import redis.clients.jedis.Transaction;
 
 import java.util.Map;
 
+@Deprecated(forRemoval = true)
 public class JedisStorage extends JedisImplementation {
 
     public JedisStorage(JedisCredentials jedisSettings) {

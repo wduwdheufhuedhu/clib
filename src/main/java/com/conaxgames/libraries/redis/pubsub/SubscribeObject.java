@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import lombok.Getter;
 
 @Getter
+@Deprecated(forRemoval = true)
 public class SubscribeObject {
 
     public MessageTypeInterface messageType = MessageTypeEnum.UNKNOWN;

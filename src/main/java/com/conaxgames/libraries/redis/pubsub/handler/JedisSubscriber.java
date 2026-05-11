@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Deprecated(forRemoval = true)
 public class JedisSubscriber<K> {
 
     private static final Map<Class<?>, JedisSubscriptionGenerator<?>> GENERATORS = new HashMap<>();

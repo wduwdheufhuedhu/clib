@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
 @RequiredArgsConstructor
+@Deprecated(forRemoval = true)
 public class PublishObject {
 
     public JsonObject object;
