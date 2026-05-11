@@ -1,6 +1,5 @@
-package com.conaxgames.libraries.util;
+package com.conaxgames.libraries.message;
 
-import com.conaxgames.libraries.message.CC;
 import com.google.common.base.Strings;
 
 public final class ProgressionBar {

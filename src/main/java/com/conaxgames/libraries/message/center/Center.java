@@ -1,4 +1,4 @@
-package com.conaxgames.libraries.util.center;
+package com.conaxgames.libraries.message.center;
 
 import com.conaxgames.libraries.message.CC;
 import org.bukkit.entity.Player;
