@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonReader;
 
 import java.io.StringReader;
 
+@Deprecated(forRemoval = true)
 public class JsonJedisSubscriptionGenerator implements JedisSubscriptionGenerator<JsonObject> {
 
     @Override

@@ -5,6 +5,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Getter
+@Deprecated(forRemoval = true)
 public class JedisCredentials {
 
     private final String address;

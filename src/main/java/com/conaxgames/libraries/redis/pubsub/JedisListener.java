@@ -9,6 +9,7 @@ import redis.clients.jedis.Jedis;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Deprecated(forRemoval = true)
 public abstract class JedisListener {
 
     private final JedisCredentials jedisSettings;
