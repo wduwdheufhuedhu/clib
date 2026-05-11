@@ -27,11 +27,10 @@ public final class TimerManager {
         timers.remove(timer);
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Timer> T getTimer(Class<T> timerClass) {
         for (var timer : timers) {
             if (timerClass.isInstance(timer)) {
-                return (T) timer;
+                return timerClass.cast(timer);
             }
         }
         return null;
@@ -51,23 +50,11 @@ public final class TimerManager {
     }
 
     public boolean hasCooldown(Player player, String key) {
-        return hasCooldown(player.getUniqueId(), key);
+        return getRemaining(player.getUniqueId(), key) > 0L;
     }
 
     public boolean hasCooldown(UUID uuid, String key) {
-        var keys = cooldowns.get(uuid);
-        if (keys == null) {
-            return false;
-        }
-        var expiry = keys.get(key);
-        if (expiry == null) {
-            return false;
-        }
-        if (System.currentTimeMillis() >= expiry) {
-            keys.remove(key);
-            return false;
-        }
-        return true;
+        return getRemaining(uuid, key) > 0L;
     }
 
     public long getRemaining(Player player, String key) {

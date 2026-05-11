@@ -6,7 +6,7 @@ import com.conaxgames.libraries.util.scheduler.Scheduler;
 
 import java.util.UUID;
 
-public class TimerCooldown {
+public final class TimerCooldown {
 
     private final Timer timer;
     private final UUID owner;
@@ -21,16 +21,8 @@ public class TimerCooldown {
         setRemaining(duration);
     }
 
-    public Timer getTimer() {
-        return timer;
-    }
-
-    public long getExpiryMillis() {
-        return expiryMillis;
-    }
-
     public long getRemaining() {
-        return getRemaining(false);
+        return pauseMillis != 0L ? pauseMillis : expiryMillis - System.currentTimeMillis();
     }
 
     void setRemaining(long milliseconds) {
@@ -38,29 +30,11 @@ public class TimerCooldown {
             cancel();
             return;
         }
-
-        long newExpiry = System.currentTimeMillis() + milliseconds;
-        if (newExpiry == expiryMillis) {
-            return;
-        }
-        expiryMillis = newExpiry;
+        expiryMillis = System.currentTimeMillis() + milliseconds;
         cancel();
-
-        long ticks = milliseconds / 50L;
-        Scheduler scheduler = LibraryPlugin.getInstance().getScheduler();
-
-        scheduledTask = scheduler.runTaskLaterCancellable(
-                LibraryPlugin.getInstance().getPlugin(),
-                this::expire,
-                ticks
-        );
-    }
-
-    long getRemaining(boolean ignorePaused) {
-        if (!ignorePaused && pauseMillis != 0L) {
-            return pauseMillis;
-        }
-        return expiryMillis - System.currentTimeMillis();
+        scheduledTask = LibraryPlugin.getInstance().getScheduler()
+                .runTaskLaterCancellable(
+                        LibraryPlugin.getInstance().getPlugin(), this::expire, milliseconds / 50L);
     }
 
     boolean isPaused() {
@@ -72,7 +46,7 @@ public class TimerCooldown {
             return;
         }
         if (paused) {
-            pauseMillis = getRemaining(true);
+            pauseMillis = expiryMillis - System.currentTimeMillis();
             cancel();
         } else {
             setRemaining(pauseMillis);
@@ -88,16 +62,10 @@ public class TimerCooldown {
     }
 
     private void expire() {
-        if (timer instanceof PlayerTimer playerTimer) {
-            playerTimer.handleExpiry(
-                    LibraryPlugin.getInstance().getPlugin().getServer().getPlayer(owner),
-                    owner
-            );
-        }
-
+        scheduledTask = null;
+        timer.handleExpiry(
+                LibraryPlugin.getInstance().getPlugin().getServer().getPlayer(owner), owner);
         LibraryPlugin.getInstance().getPlugin().getServer().getPluginManager()
                 .callEvent(new TimerExpireEvent(owner, timer));
-
-        scheduledTask = null;
     }
 }
