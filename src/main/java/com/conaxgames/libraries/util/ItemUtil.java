@@ -1,5 +1,6 @@
 package com.conaxgames.libraries.util;
 
+import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.message.FormatUtil;
 import com.conaxgames.libraries.message.ItemNameUtil;
 import com.conaxgames.libraries.message.TimeUtil;

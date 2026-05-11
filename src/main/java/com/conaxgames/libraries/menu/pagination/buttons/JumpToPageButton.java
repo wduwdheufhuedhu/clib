@@ -3,7 +3,7 @@ package com.conaxgames.libraries.menu.pagination.buttons;
 import com.conaxgames.libraries.event.impl.menu.MenuButtonJumpToEvent;
 import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.menu.pagination.PaginatedMenu;
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import com.cryptomorin.xseries.XMaterial;
 import lombok.Setter;
 import org.bukkit.Material;

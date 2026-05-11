@@ -1,6 +1,6 @@
 package com.conaxgames.libraries.board;
 
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import org.bukkit.scoreboard.Team;
 
 import java.util.concurrent.atomic.AtomicInteger;

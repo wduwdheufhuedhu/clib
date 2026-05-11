@@ -1,5 +1,6 @@
 package com.conaxgames.libraries.util;
 
+import com.conaxgames.libraries.message.CC;
 import com.cryptomorin.xseries.XMaterial;
 
 import java.util.List;

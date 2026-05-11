@@ -1,6 +1,6 @@
 package com.conaxgames.libraries.commands.message;
 
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 
 public enum ACFMinecraftMessage {
 

@@ -1,6 +1,6 @@
 package com.conaxgames.libraries.util.center;
 
-import com.conaxgames.libraries.util.CC;
+import com.conaxgames.libraries.message.CC;
 import org.bukkit.entity.Player;
 
 public class Center {
