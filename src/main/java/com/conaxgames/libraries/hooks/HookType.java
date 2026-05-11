@@ -45,16 +45,10 @@ public enum HookType {
         this.pluginName = pluginName;
     }
 
-    /**
-     * @return the canonical plugin name as registered with Bukkit
-     */
     public String pluginName() {
         return pluginName;
     }
 
-    /**
-     * Resolves a {@link HookType} from a Bukkit plugin name (case-insensitive).
-     */
     public static Optional<HookType> fromPluginName(String name) {
         return Optional.ofNullable(BY_PLUGIN_NAME.get(name.toLowerCase(Locale.ROOT)));
     }

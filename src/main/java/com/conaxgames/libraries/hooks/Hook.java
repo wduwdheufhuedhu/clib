@@ -4,9 +4,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;
 
-/**
- * Immutable representation of a detected third-party plugin integration.
- */
 public record Hook(HookType type, Plugin plugin) {
 
     public Hook {
