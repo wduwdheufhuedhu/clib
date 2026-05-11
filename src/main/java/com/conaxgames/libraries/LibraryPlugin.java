@@ -54,7 +54,7 @@ public class LibraryPlugin {
         this.libraryLogger = new LibraryLogger(plugin, debugPrimary, debugSecondary);
         this.paperCommandManager = new PaperCommandManager(this.plugin);
         this.commandRegistry = new CommandRegistry(this, paperCommandManager);
-        this.hookManager = new HookManager(this);
+        this.hookManager = new HookManager(this.plugin);
         this.timerManager = new TimerManager();
         this.moduleManager = new ModuleManager(this, moduleCommandAlias, moduleCommandPerm);
 
@@ -82,12 +82,7 @@ public class LibraryPlugin {
     }
 
     private void registerEventListeners() {
-        Arrays.asList(
-                new PlayerListener(this),
-                this.hookManager
-        ).forEach(listener ->
-                Bukkit.getPluginManager().registerEvents(listener, this.plugin)
-        );
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this.plugin);
     }
 
     private void logMultipleInitializationWarning() {
