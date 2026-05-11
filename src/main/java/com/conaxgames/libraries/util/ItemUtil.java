@@ -1,7 +1,6 @@
 package com.conaxgames.libraries.util;
 
 import com.conaxgames.libraries.message.CC;
-import com.conaxgames.libraries.message.FormatUtil;
 import com.conaxgames.libraries.message.TimeUtil;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.ChatColor;
@@ -49,7 +48,7 @@ public final class ItemUtil {
         }
 
         meta.setLore(Arrays.asList(
-                "", CC.GRAY + formatName(type.getEffectType().getKey().getKey()) + " " + FormatUtil.toRoman(level) + " Potion",
+                "", CC.GRAY + formatName(type.getEffectType().getKey().getKey()) + " " + level + " Potion",
                 CC.GRAY + "    Duration: " + TimeUtil.millisToRoundedTime(duration * 1000L)));
 
         meta.addCustomEffect(new PotionEffect(type.getEffectType(), duration * 20, level - 1), false);
