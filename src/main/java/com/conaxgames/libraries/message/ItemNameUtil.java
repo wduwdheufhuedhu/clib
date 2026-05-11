@@ -1,7 +1,5 @@
 package com.conaxgames.libraries.message;
 
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Map;
@@ -39,10 +37,6 @@ public final class ItemNameUtil {
     public static String potionLookup(PotionEffectType potion) {
         var result = POTION_NAMES.get(potion.getKey().getKey());
         return result != null ? result : capitalizeFully(potion.getKey().getKey());
-    }
-
-    public static String enchantLookup(Enchantment enchantment, Player player) {
-        return capitalizeFully(enchantment.getKey().getKey());
     }
 
     private static String capitalizeFully(String input) {

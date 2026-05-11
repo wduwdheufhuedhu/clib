@@ -34,69 +34,6 @@ public final class CC {
     public static final String DARK_RED = ChatColor.DARK_RED.toString();
     public static final String LIGHT_PURPLE = ChatColor.LIGHT_PURPLE.toString();
 
-    public static final String B = BOLD;
-    public static final String B_BLUE = BLUE + B;
-    public static final String B_AQUA = AQUA + B;
-    public static final String B_YELLOW = YELLOW + B;
-    public static final String B_RED = RED + B;
-    public static final String B_GRAY = GRAY + B;
-    public static final String B_GOLD = GOLD + B;
-    public static final String B_GREEN = GREEN + B;
-    public static final String B_WHITE = WHITE + B;
-    public static final String B_BLACK = BLACK + B;
-    public static final String B_DARK_AQUA = DARK_AQUA + B;
-    public static final String B_DARK_GREEN = DARK_GREEN + B;
-    public static final String B_DARK_PURPLE = DARK_PURPLE + B;
-    public static final String B_DARK_RED = DARK_RED + B;
-    public static final String B_LIGHT_PURPLE = LIGHT_PURPLE + B;
-
-    public static final String M = MAGIC;
-    public static final String O = MAGIC;
-    public static final String I = ITALIC;
-    public static final String I_BLUE = BLUE + I;
-    public static final String I_AQUA = AQUA + I;
-    public static final String I_YELLOW = YELLOW + I;
-    public static final String I_RED = RED + I;
-    public static final String I_GRAY = GRAY + I;
-    public static final String I_GOLD = GOLD + I;
-    public static final String I_GREEN = GREEN + I;
-    public static final String I_WHITE = WHITE + I;
-    public static final String I_BLACK = BLACK + I;
-
-    public static final String S = STRIKE_THROUGH;
-    public static final String R = RESET;
-
-    public static final String D_BLUE = DARK_BLUE;
-    public static final String BD_BLUE = D_BLUE + B;
-    public static final String ID_BLUE = D_BLUE + I;
-    public static final String D_AQUA = DARK_AQUA;
-    public static final String BD_AQUA = D_AQUA + B;
-    public static final String ID_AQUA = D_AQUA + I;
-    public static final String D_GRAY = DARK_GRAY;
-    public static final String BD_GRAY = D_GRAY + B;
-    public static final String ID_GRAY = D_GRAY + I;
-    public static final String D_GREEN = DARK_GREEN;
-    public static final String BD_GREEN = D_GREEN + B;
-    public static final String ID_GREEN = D_GREEN + I;
-    public static final String D_PURPLE = DARK_PURPLE;
-    public static final String BD_PURPLE = D_PURPLE + B;
-    public static final String ID_PURPLE = D_PURPLE + I;
-    public static final String D_RED = DARK_RED;
-    public static final String BD_RED = D_RED + B;
-    public static final String ID_RED = D_RED + I;
-    public static final String L_PURPLE = LIGHT_PURPLE;
-    public static final String BL_PURPLE = L_PURPLE + B;
-    public static final String IL_PURPLE = L_PURPLE + I;
-
-    public static final String U_GREEN = U + GREEN;
-    public static final String U_GRAY = U + GRAY;
-    public static final String U_WHITE = U + WHITE;
-    public static final String U_GOLD = U + GOLD;
-    public static final String U_YELLOW = U + YELLOW;
-    public static final String U_LIGHT_PURPLE = U + LIGHT_PURPLE;
-    public static final String U_AQUA = U + AQUA;
-    public static final String U_DARK_AQUA = U + DARK_AQUA;
-
     private static final char SECTION = ChatColor.COLOR_CHAR;
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
     private static final Pattern LEGACY_HEX_STRIP = Pattern.compile("(?i)§x(?:§[0-9a-f]){6}");
@@ -104,11 +41,8 @@ public final class CC {
     private static final Pattern INLINE_HEX_STRIP = Pattern.compile("(?i)&#[0-9a-f]{6}");
 
     public static String PRIMARY = YELLOW;
-    public static String B_PRIMARY = PRIMARY + B;
     public static String SECONDARY = GOLD;
-    public static String B_SECONDARY = SECONDARY + B;
     public static String TERTIARY = GRAY;
-    public static String B_TERTIARY = TERTIARY + B;
 
     public static String translate(String string) {
         if (string == null) return null;

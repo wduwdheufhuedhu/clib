@@ -1,6 +1,5 @@
 package com.conaxgames.libraries.message;
 
-import java.text.DecimalFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -8,12 +7,6 @@ import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class DateTimeFormats {
-
-    public static final ThreadLocal<DecimalFormat> REMAINING_SECONDS =
-            ThreadLocal.withInitial(() -> new DecimalFormat("0.#"));
-
-    public static final ThreadLocal<DecimalFormat> REMAINING_SECONDS_TRAILING =
-            ThreadLocal.withInitial(() -> new DecimalFormat("0.0"));
 
     private static final AtomicBoolean loaded = new AtomicBoolean(false);
 
