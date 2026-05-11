@@ -1,6 +1,7 @@
 package com.conaxgames.libraries;
 
 import co.aikar.commands.PaperCommandManager;
+import com.conaxgames.libraries.board.BoardManager;
 import com.conaxgames.libraries.commands.CommandRegistry;
 import com.conaxgames.libraries.debug.LibraryLogger;
 import com.conaxgames.libraries.event.impl.LibraryPluginEnableEvent;
@@ -26,6 +27,7 @@ public class LibraryPlugin {
     private TimerManager timerManager;
     private PaperCommandManager paperCommandManager;
     private CommandRegistry commandRegistry;
+    private BoardManager boardManager;
     private HookManager hookManager;
     private ModuleManager moduleManager;
     private Scheduler scheduler;
@@ -64,6 +66,12 @@ public class LibraryPlugin {
 
     public LibraryPlugin onDisable() {
         return this;
+    }
+
+    public void setBoardManager(BoardManager boardManager) {
+        this.boardManager = boardManager;
+        long interval = this.boardManager.adapter().getInterval();
+        this.scheduler.runTaskTimer(this.plugin, this.boardManager, 0L, interval);
     }
 
     private void initializeScheduler() {

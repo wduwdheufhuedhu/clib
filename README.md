@@ -21,6 +21,7 @@
 
 - [Menu](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/menu/Menu.java) — Inventory GUI framework
 - [Scheduler](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/scheduler/Scheduler.java) — Bukkit/Folia scheduling abstraction
+- [BoardManager](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/board/BoardManager.java) — Scoreboard management
 - [Timer](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/timer/Timer.java) — Cooldown timers with events
 - [ItemBuilderUtil](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/ItemBuilderUtil.java) — Item builder utility
 - [PlayerInventoryUtil](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/inventory/PlayerInventoryUtil.java) — Inventory snapshot and restore
