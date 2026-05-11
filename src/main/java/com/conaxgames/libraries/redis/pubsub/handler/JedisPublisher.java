@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.Jedis;
 
 @RequiredArgsConstructor
+@Deprecated(forRemoval = true)
 public class JedisPublisher<K> {
     @Getter
     private final JedisCredentials jedisSettings;

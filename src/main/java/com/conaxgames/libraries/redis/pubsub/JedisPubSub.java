@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 
 import java.util.concurrent.CompletableFuture;
 
+@Deprecated(forRemoval = true)
 public abstract class JedisPubSub implements JedisSubscriptionHandler<JsonObject> {
 
     public JedisPublisher<JsonObject> publisher;

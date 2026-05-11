@@ -3,6 +3,7 @@ package com.conaxgames.libraries.redis.message;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated(forRemoval = true)
 public class UniversalMessageTypeResolver implements MessageTypeResolver {
 
     private final Map<String, MessageTypeInterface> messageTypeMap = new HashMap<>();
