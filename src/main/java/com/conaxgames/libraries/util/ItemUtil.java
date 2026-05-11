@@ -2,7 +2,6 @@ package com.conaxgames.libraries.util;
 
 import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.message.FormatUtil;
-import com.conaxgames.libraries.message.ItemNameUtil;
 import com.conaxgames.libraries.message.TimeUtil;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.ChatColor;
@@ -50,7 +49,7 @@ public final class ItemUtil {
         }
 
         meta.setLore(Arrays.asList(
-                "", CC.GRAY + ItemNameUtil.potionLookup(type.getEffectType()) + " " + FormatUtil.toRoman(level) + " Potion",
+                "", CC.GRAY + formatName(type.getEffectType().getKey().getKey()) + " " + FormatUtil.toRoman(level) + " Potion",
                 CC.GRAY + "    Duration: " + TimeUtil.millisToRoundedTime(duration * 1000L)));
 
         meta.addCustomEffect(new PotionEffect(type.getEffectType(), duration * 20, level - 1), false);
@@ -220,6 +219,18 @@ public final class ItemUtil {
                     return 0;
             }
         }
+    }
+
+    private static String formatName(String key) {
+        var sb = new StringBuilder(key.length());
+        for (var word : key.split("_")) {
+            if (!sb.isEmpty()) sb.append(' ');
+            if (!word.isEmpty()) {
+                sb.append(Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) sb.append(word.substring(1));
+            }
+        }
+        return sb.toString();
     }
 
     private static List<String> translate(List<String> text) {
