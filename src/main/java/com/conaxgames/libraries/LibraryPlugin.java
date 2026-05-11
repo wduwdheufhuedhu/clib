@@ -9,7 +9,6 @@ import com.conaxgames.libraries.hooks.HookManager;
 import com.conaxgames.libraries.module.ModuleManager;
 import com.conaxgames.libraries.timer.TimerManager;
 import com.conaxgames.libraries.util.scheduler.Scheduler;
-import com.conaxgames.libraries.util.scheduler.Schedulers;
 import com.google.common.base.Joiner;
 import lombok.Getter;
 import org.bukkit.plugin.IllegalPluginAccessException;
@@ -71,11 +70,11 @@ public class LibraryPlugin {
     public void setBoardManager(BoardManager boardManager) {
         this.boardManager = boardManager;
         long interval = this.boardManager.adapter().getInterval();
-        this.scheduler.runTaskTimer(this.plugin, this.boardManager, 0L, interval);
+        this.scheduler.runTimer(this.plugin, this.boardManager, 0L, interval);
     }
 
     private void initializeScheduler() {
-        this.scheduler = Schedulers.forServer(this.plugin.getServer());
+        this.scheduler = Scheduler.create(this.plugin.getServer());
     }
 
     private void logMultipleInitializationWarning() {

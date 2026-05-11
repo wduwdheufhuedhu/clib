@@ -11,7 +11,7 @@ public final class TimerCooldown {
     private final Timer timer;
     private final UUID owner;
 
-    private Scheduler.CancellableTask scheduledTask;
+    private Scheduler.Task scheduledTask;
     private long expiryMillis;
     private long pauseMillis;
 
@@ -33,8 +33,7 @@ public final class TimerCooldown {
         expiryMillis = System.currentTimeMillis() + milliseconds;
         cancel();
         scheduledTask = LibraryPlugin.getInstance().getScheduler()
-                .runTaskLaterCancellable(
-                        LibraryPlugin.getInstance().getPlugin(), this::expire, milliseconds / 50L);
+                .runLater(LibraryPlugin.getInstance().getPlugin(), this::expire, milliseconds / 50L);
     }
 
     boolean isPaused() {

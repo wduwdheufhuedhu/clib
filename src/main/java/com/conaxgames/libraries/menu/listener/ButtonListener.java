@@ -63,7 +63,7 @@ public class ButtonListener implements Listener {
                 event.setCancelled(cancel);
             }
             if (event.isCancelled()) {
-                LibraryPlugin.getInstance().getScheduler().runTaskLater(
+                LibraryPlugin.getInstance().getScheduler().runLater(
                         LibraryPlugin.getInstance().getPlugin(),
                         player::updateInventory,
                         1L
@@ -110,7 +110,7 @@ public class ButtonListener implements Listener {
         }
         Menu openMenu = holder.getMenu();
 
-        LibraryPlugin.getInstance().getScheduler().runTaskLater(LibraryPlugin.getInstance().getPlugin(), () -> {
+        LibraryPlugin.getInstance().getScheduler().runLater(LibraryPlugin.getInstance().getPlugin(), () -> {
             Menu newMenu = Menu.currentlyOpenedMenus.get(id);
 
             if (openMenu.getPrevious() != null) {

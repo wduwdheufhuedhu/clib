@@ -1,32 +1,147 @@
 package com.conaxgames.libraries.util.scheduler;
 
+import io.papermc.paper.threadedregions.scheduler.AsyncScheduler;
+import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
-public interface Scheduler {
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-    void runTask(Plugin plugin, Runnable runnable);
+/**
+ * Unified scheduling abstraction for Paper (1.8.8–26.1.2) and Folia (26.1.2).
+ *
+ * <p>Every method returns a {@link Task} handle; callers that do not need
+ * cancellation simply discard the return value.</p>
+ */
+public sealed interface Scheduler {
 
-    void runTaskAsynchronously(Plugin plugin, Runnable runnable);
+    static Scheduler create(Server server) {
+        try {
+            if (Class.forName("io.papermc.paper.threadedregions.RegionizedServer").isInstance(server)) {
+                return new Folia();
+            }
+        } catch (ClassNotFoundException _) {}
+        return new Paper();
+    }
 
-    void runTaskLater(Plugin plugin, Runnable runnable, long delay);
+    Task run(Plugin plugin, Runnable task);
 
-    void runTaskLaterAsynchronously(Plugin plugin, Runnable runnable, long delay);
+    Task runAsync(Plugin plugin, Runnable task);
 
-    void runTaskTimer(Plugin plugin, Runnable runnable, long delay, long period);
+    Task runLater(Plugin plugin, Runnable task, long delayTicks);
 
-    void runTaskTimerAsynchronously(Plugin plugin, Runnable runnable, long delay, long period);
+    Task runLaterAsync(Plugin plugin, Runnable task, long delayTicks);
 
-    CancellableTask runTaskCancellable(Plugin plugin, Runnable runnable);
+    Task runTimer(Plugin plugin, Runnable task, long delayTicks, long periodTicks);
 
-    CancellableTask runTaskLaterCancellable(Plugin plugin, Runnable runnable, long delay);
+    Task runTimerAsync(Plugin plugin, Runnable task, long delayTicks, long periodTicks);
 
-    CancellableTask runTaskTimerCancellable(Plugin plugin, Runnable runnable, long delay, long period);
+    void cancelAll(Plugin plugin);
 
-    CancellableTask runTaskTimerAsynchronouslyCancellable(Plugin plugin, Runnable runnable, long delay, long period);
-
-    interface CancellableTask {
+    interface Task {
         void cancel();
 
-        boolean isCancelled();
+        boolean cancelled();
+    }
+
+    // ── Paper / Bukkit backend (1.8.8 – 26.1.2) ────────────────────────
+
+    final class Paper implements Scheduler {
+
+        private record WrappedTask(BukkitTask handle) implements Task {
+            @Override public void cancel() { handle.cancel(); }
+            @Override public boolean cancelled() { return handle.isCancelled(); }
+        }
+
+        private static BukkitScheduler scheduler(Plugin plugin) {
+            return plugin.getServer().getScheduler();
+        }
+
+        @Override public Task run(Plugin plugin, Runnable task) {
+            return new WrappedTask(scheduler(plugin).runTask(plugin, task));
+        }
+
+        @Override public Task runAsync(Plugin plugin, Runnable task) {
+            return new WrappedTask(scheduler(plugin).runTaskAsynchronously(plugin, task));
+        }
+
+        @Override public Task runLater(Plugin plugin, Runnable task, long delayTicks) {
+            return new WrappedTask(scheduler(plugin).runTaskLater(plugin, task, delayTicks));
+        }
+
+        @Override public Task runLaterAsync(Plugin plugin, Runnable task, long delayTicks) {
+            return new WrappedTask(scheduler(plugin).runTaskLaterAsynchronously(plugin, task, delayTicks));
+        }
+
+        @Override public Task runTimer(Plugin plugin, Runnable task, long delayTicks, long periodTicks) {
+            return new WrappedTask(scheduler(plugin).runTaskTimer(plugin, task, delayTicks, periodTicks));
+        }
+
+        @Override public Task runTimerAsync(Plugin plugin, Runnable task, long delayTicks, long periodTicks) {
+            return new WrappedTask(scheduler(plugin).runTaskTimerAsynchronously(plugin, task, delayTicks, periodTicks));
+        }
+
+        @Override public void cancelAll(Plugin plugin) {
+            scheduler(plugin).cancelTasks(plugin);
+        }
+    }
+
+    // ── Folia backend (regionised scheduler) ────────────────────────────
+
+    final class Folia implements Scheduler {
+
+        private static final long MS_PER_TICK = 50L;
+
+        private record WrappedTask(ScheduledTask handle) implements Task {
+            @Override public void cancel() { handle.cancel(); }
+            @Override public boolean cancelled() { return handle.isCancelled(); }
+        }
+
+        private static Consumer<ScheduledTask> wrap(Runnable task) {
+            return _ -> task.run();
+        }
+
+        private static GlobalRegionScheduler global(Plugin plugin) {
+            return plugin.getServer().getGlobalRegionScheduler();
+        }
+
+        private static AsyncScheduler async(Plugin plugin) {
+            return plugin.getServer().getAsyncScheduler();
+        }
+
+        @Override public Task run(Plugin plugin, Runnable task) {
+            return new WrappedTask(global(plugin).run(plugin, wrap(task)));
+        }
+
+        @Override public Task runAsync(Plugin plugin, Runnable task) {
+            return new WrappedTask(async(plugin).runNow(plugin, wrap(task)));
+        }
+
+        @Override public Task runLater(Plugin plugin, Runnable task, long delayTicks) {
+            return new WrappedTask(global(plugin).runDelayed(plugin, wrap(task), delayTicks));
+        }
+
+        @Override public Task runLaterAsync(Plugin plugin, Runnable task, long delayTicks) {
+            return new WrappedTask(async(plugin).runDelayed(
+                    plugin, wrap(task), delayTicks * MS_PER_TICK, TimeUnit.MILLISECONDS));
+        }
+
+        @Override public Task runTimer(Plugin plugin, Runnable task, long delayTicks, long periodTicks) {
+            return new WrappedTask(global(plugin).runAtFixedRate(plugin, wrap(task), delayTicks, periodTicks));
+        }
+
+        @Override public Task runTimerAsync(Plugin plugin, Runnable task, long delayTicks, long periodTicks) {
+            return new WrappedTask(async(plugin).runAtFixedRate(
+                    plugin, wrap(task), delayTicks * MS_PER_TICK, periodTicks * MS_PER_TICK, TimeUnit.MILLISECONDS));
+        }
+
+        @Override public void cancelAll(Plugin plugin) {
+            global(plugin).cancelTasks(plugin);
+            async(plugin).cancelTasks(plugin);
+        }
     }
 }

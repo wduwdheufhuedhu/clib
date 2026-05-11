@@ -26,7 +26,7 @@ public class BaseEvent extends Event {
         if (plugin == null) {
             Bukkit.getServer().getPluginManager().callEvent(this);
         } else {
-            LibraryPlugin.getInstance().getScheduler().runTask(plugin, () ->
+            LibraryPlugin.getInstance().getScheduler().run(plugin, () ->
                     Bukkit.getServer().getPluginManager().callEvent(this)
             );
         }

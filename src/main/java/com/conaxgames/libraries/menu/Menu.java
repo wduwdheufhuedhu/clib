@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class Menu {
 
     public static final Map<UUID, Menu> currentlyOpenedMenus = new ConcurrentHashMap<>();
-    public static final Map<UUID, Scheduler.CancellableTask> checkTasks = new ConcurrentHashMap<>();
+    public static final Map<UUID, Scheduler.Task> checkTasks = new ConcurrentHashMap<>();
     private static final long MENU_UPDATE_DELAY_TICKS = 10L;
     private static final long MENU_UPDATE_PERIOD_TICKS = 20L;
 
@@ -51,7 +51,7 @@ public abstract class Menu {
     }
 
     public static void cancelCheck(Player player) {
-        Scheduler.CancellableTask task = checkTasks.remove(player.getUniqueId());
+        Scheduler.Task task = checkTasks.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
         }
@@ -72,7 +72,7 @@ public abstract class Menu {
         if (Bukkit.isPrimaryThread()) {
             open(player);
         } else {
-            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), () -> open(player));
+            LibraryPlugin.getInstance().getScheduler().run(LibraryPlugin.getInstance().getPlugin(), () -> open(player));
         }
     }
 
@@ -139,7 +139,7 @@ public abstract class Menu {
             return;
         }
 
-        Scheduler.CancellableTask task = LibraryPlugin.getInstance().getScheduler().runTaskTimerCancellable(
+        Scheduler.Task task = LibraryPlugin.getInstance().getScheduler().runTimer(
                 LibraryPlugin.getInstance().getPlugin(),
                 () -> {
                     if (!player.isOnline()) {
