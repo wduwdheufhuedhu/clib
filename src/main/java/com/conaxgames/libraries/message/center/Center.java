@@ -3,9 +3,12 @@ package com.conaxgames.libraries.message.center;
 import com.conaxgames.libraries.message.CC;
 import org.bukkit.entity.Player;
 
-public class Center {
+public final class Center {
 
-    private final static int CENTER_PX = 154;
+    private static final int CENTER_PX = 154;
+
+    private Center() {
+    }
 
     public static String getCentered(String message) {
         if (message == null || message.isEmpty()) {

@@ -4,11 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.text.WordUtils;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Map;
 
 public class ItemNameUtil {
+
+    private ItemNameUtil() {
+    }
 
     private static final Map<String, String> potionmap = ImmutableMap.<String, String>builder()
             .put("speed", "Speed")
@@ -51,6 +55,10 @@ public class ItemNameUtil {
     public static String enchantLookup(Enchantment enchantment, Player player) {
         String key = enchantment.getKey().getKey();
         return WordUtils.capitalizeFully(key.replace('_', ' ').replace('-', ' '));
+    }
+
+    public static String getItemName(ItemStack item) {
+        return item.getType().toString().replace("_", "");
     }
 }
 

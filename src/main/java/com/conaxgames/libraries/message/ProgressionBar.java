@@ -4,6 +4,9 @@ import com.google.common.base.Strings;
 
 public final class ProgressionBar {
 
+    private ProgressionBar() {
+    }
+
     public static String construct(int current, int max) {
         return construct(current, max, 20, '-', CC.GREEN, CC.GRAY);
     }

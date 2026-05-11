@@ -11,8 +11,11 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public enum FormatUtil {
-    ;
+public final class FormatUtil {
+
+    private FormatUtil() {
+    }
+
     private static final Pattern FORMATTING = Pattern.compile("^.*(?<format>(\u00a7[0-9a-fklmor])+).*");
     private final static TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
 
@@ -205,8 +208,12 @@ public enum FormatUtil {
         return ROMAN_NUMERALS.get(l) + toRoman(number - l);
     }
 
+    /**
+     * @deprecated Use {@link ItemNameUtil#getItemName(ItemStack)}.
+     */
+    @Deprecated
     public static String getItemName(ItemStack item) {
-        return item.getType().toString().replace("_", "");
+        return ItemNameUtil.getItemName(item);
     }
 
     public static String andJoin(Collection<String> collection, boolean delimiterBeforeAnd) {
