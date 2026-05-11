@@ -1,4 +1,4 @@
-package com.conaxgames.libraries.module.type;
+package com.conaxgames.libraries.module;
 
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.config.CommentedConfiguration;

@@ -2,7 +2,6 @@ package com.conaxgames.libraries.module;
 
 import co.aikar.commands.PaperCommandManager;
 import com.conaxgames.libraries.LibraryPlugin;
-import com.conaxgames.libraries.module.type.Module;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
