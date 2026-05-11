@@ -1,21 +1,18 @@
 package com.conaxgames.libraries.timer;
 
-import lombok.Getter;
+/**
+ * Immutable snapshot of a single quick-timer entry.
+ *
+ * @param expiryMillis epoch-millis at which this timer expires
+ * @param announce     whether expiry should be announced to the player
+ */
+public record QuickTimerType(long expiryMillis, boolean announce) {
 
-import java.util.HashMap;
-import java.util.UUID;
+    public long getRemaining() {
+        return expiryMillis - System.currentTimeMillis();
+    }
 
-@Getter
-public class QuickTimerType {
-
-    private final boolean announce;
-    public UUID player;
-    public long time;
-    public HashMap<String, QuickTimerType> timerMap = new HashMap<>();
-
-    public QuickTimerType(UUID player, long time, boolean announce) {
-        this.player = player;
-        this.time = time;
-        this.announce = announce;
+    public boolean isExpired() {
+        return getRemaining() <= 0L;
     }
 }

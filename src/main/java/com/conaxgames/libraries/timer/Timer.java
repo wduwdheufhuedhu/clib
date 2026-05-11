@@ -1,19 +1,26 @@
 package com.conaxgames.libraries.timer;
 
-import lombok.Getter;
+/**
+ * Base type for all managed timers in the library.
+ *
+ * <p>Sealed to {@link PlayerTimer} which is itself {@code non-sealed},
+ * so downstream code extends {@code PlayerTimer} for concrete timers.
+ */
+public sealed abstract class Timer permits PlayerTimer {
 
-public abstract class Timer {
+    private final String name;
+    private final long defaultCooldown;
 
-    protected final String name;
-    @Getter
-    protected final long defaultCooldown;
-
-    public Timer(String name, long defaultCooldown) {
+    protected Timer(String name, long defaultCooldown) {
         this.name = name;
         this.defaultCooldown = defaultCooldown;
     }
 
     public final String getDisplayName() {
-        return this.name;
+        return name;
+    }
+
+    public final long getDefaultCooldown() {
+        return defaultCooldown;
     }
 }
