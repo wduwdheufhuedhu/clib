@@ -17,7 +17,7 @@ public final class BoardManager implements Runnable {
     private final BoardAdapter adapter;
 
     public BoardManager(BoardAdapter adapter) {
-        this.adapter = adapter;
+        this.adapter = Objects.requireNonNull(adapter);
     }
 
     public BoardAdapter adapter() {
@@ -44,18 +44,9 @@ public final class BoardManager implements Runnable {
         });
     }
 
-    @SuppressWarnings("deprecation")
     private void updateBoard(Player player, Board board) {
-        var lines = adapter.getLines(player, board);
-        if (lines == null) {
-            lines = List.of();
-        }
-
-        var newTitle = board.clipTitle(adapter.getTitle(player));
-        if (!Objects.equals(newTitle, board.lastTitle())) {
-            board.lastTitle(newTitle);
-            board.objective().setDisplayName(newTitle);
-        }
+        var lines = Objects.requireNonNullElse(adapter.getLines(player, board), List.<String>of());
+        board.refreshTitle(board.clipTitle(adapter.getTitle(player)));
 
         var entries = board.entries();
         while (entries.size() > lines.size()) {
@@ -63,7 +54,8 @@ public final class BoardManager implements Runnable {
         }
 
         int i = 0;
-        for (var line : lines.reversed()) {
+        for (var raw : lines.reversed()) {
+            var line = Objects.requireNonNullElse(raw, "");
             BoardEntry entry;
             if (i < entries.size()) {
                 entry = entries.get(i);

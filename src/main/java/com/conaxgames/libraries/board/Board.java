@@ -3,10 +3,6 @@ package com.conaxgames.libraries.board;
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.VersioningChecker;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -15,13 +11,14 @@ import org.bukkit.scoreboard.Scoreboard;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-@Getter(AccessLevel.PACKAGE)
-@Accessors(fluent = true)
+@SuppressWarnings("deprecation")
 public final class Board {
 
-    private static final boolean LEGACY = VersioningChecker.getInstance().isServerVersionBefore("1.13");
+    private static final boolean LEGACY_TEAM = VersioningChecker.getInstance().isServerVersionBefore("1.13");
+    private static final boolean LEGACY_TITLE = VersioningChecker.getInstance().isServerVersionBefore("1.18");
 
     private static final String[] ENTRY_KEYS;
 
@@ -34,33 +31,46 @@ public final class Board {
     }
 
     private final List<BoardEntry> entries = new ArrayList<>();
-    @Getter(AccessLevel.NONE)
     private final Set<String> usedKeys = new HashSet<>();
-    @Getter(AccessLevel.PUBLIC)
     private final Scoreboard scoreboard;
     private final Objective objective;
-    @Setter(AccessLevel.PACKAGE)
     private volatile String lastTitle;
-    @Getter(AccessLevel.PACKAGE)
-    private static int segmentMax = LEGACY ? 16 : 64;
-    private static int titleMax = LEGACY ? 32 : 1024;
 
-    @SuppressWarnings("deprecation")
     Board(Player player, BoardAdapter adapter) {
         var manager = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
         this.scoreboard = player.getScoreboard().equals(manager.getMainScoreboard())
                 ? manager.getNewScoreboard()
                 : player.getScoreboard();
 
-        this.lastTitle = clipTitle(adapter.getTitle(player));
         this.objective = scoreboard.registerNewObjective("sb", "dummy");
-        objective.setDisplayName(lastTitle);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        this.lastTitle = clipTitle(adapter.getTitle(player));
+        objective.setDisplayName(lastTitle);
+    }
+
+    static int segmentMax() {
+        return LEGACY_TEAM ? 16 : 64;
+    }
+
+    static int titleMax() {
+        return LEGACY_TITLE ? 32 : 1024;
+    }
+
+    public Scoreboard scoreboard() {
+        return scoreboard;
+    }
+
+    void refreshTitle(String clipped) {
+        if (Objects.equals(clipped, lastTitle)) {
+            return;
+        }
+        lastTitle = clipped;
+        objective.setDisplayName(clipped);
     }
 
     String allocateKey(String text) {
-        var suffix = text.length() > segmentMax
-                ? CC.getLastColors(text.substring(0, segmentMax))
+        var suffix = text.length() > segmentMax()
+                ? CC.getLastColors(text.substring(0, segmentMax()))
                 : "";
         for (var base : ENTRY_KEYS) {
             var key = base + suffix;
@@ -77,8 +87,16 @@ public final class Board {
 
     String clipTitle(String raw) {
         var translated = CC.translate(raw != null ? raw : "");
-        return translated.length() <= titleMax
+        return translated.length() <= titleMax()
                 ? translated
-                : translated.substring(0, titleMax);
+                : translated.substring(0, titleMax());
+    }
+
+    Objective objective() {
+        return objective;
+    }
+
+    List<BoardEntry> entries() {
+        return entries;
     }
 }

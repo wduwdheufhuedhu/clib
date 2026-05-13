@@ -5,6 +5,7 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+@SuppressWarnings("deprecation")
 final class BoardEntry {
 
     private static final AtomicInteger TEAM_COUNTER = new AtomicInteger();
@@ -23,7 +24,6 @@ final class BoardEntry {
         team.addEntry(key);
     }
 
-    @SuppressWarnings("deprecation")
     void send(int position) {
         var split = split();
         int max = Board.segmentMax();
