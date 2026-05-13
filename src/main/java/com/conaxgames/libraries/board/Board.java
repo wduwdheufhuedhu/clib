@@ -3,6 +3,10 @@ package com.conaxgames.libraries.board;
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.VersioningChecker;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -13,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Getter(AccessLevel.PACKAGE)
+@Accessors(fluent = true)
 public final class Board {
 
     private static final boolean LEGACY = VersioningChecker.getInstance().isServerVersionBefore("1.13");
@@ -28,10 +34,15 @@ public final class Board {
     }
 
     private final List<BoardEntry> entries = new ArrayList<>();
+    @Getter(AccessLevel.NONE)
     private final Set<String> usedKeys = new HashSet<>();
+    @Getter(AccessLevel.PUBLIC)
     private final Scoreboard scoreboard;
     private final Objective objective;
+    @Setter(AccessLevel.PACKAGE)
     private volatile String lastTitle;
+    private static int segmentMax = LEGACY ? 16 : 64;
+    private static int titleMax = LEGACY ? 32 : 1024;
 
     @SuppressWarnings("deprecation")
     Board(Player player, BoardAdapter adapter) {
@@ -46,21 +57,9 @@ public final class Board {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
     }
 
-    static int segmentMax() {
-        return LEGACY ? 16 : 64;
-    }
-
-    static int titleMax() {
-        return LEGACY ? 32 : 1024;
-    }
-
-    public Scoreboard scoreboard() {
-        return scoreboard;
-    }
-
     String allocateKey(String text) {
-        var suffix = text.length() > segmentMax()
-                ? CC.getLastColors(text.substring(0, segmentMax()))
+        var suffix = text.length() > segmentMax
+                ? CC.getLastColors(text.substring(0, segmentMax))
                 : "";
         for (var base : ENTRY_KEYS) {
             var key = base + suffix;
@@ -75,13 +74,8 @@ public final class Board {
 
     String clipTitle(String raw) {
         var translated = CC.translate(raw != null ? raw : "");
-        return translated.length() <= titleMax()
+        return translated.length() <= titleMax
                 ? translated
-                : translated.substring(0, titleMax());
+                : translated.substring(0, titleMax);
     }
-
-    Objective objective()        { return objective; }
-    List<BoardEntry> entries()   { return entries; }
-    String lastTitle()           { return lastTitle; }
-    void lastTitle(String title) { lastTitle = title; }
 }
