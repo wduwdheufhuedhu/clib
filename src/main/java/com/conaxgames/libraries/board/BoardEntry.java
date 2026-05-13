@@ -51,10 +51,6 @@ final class BoardEntry {
         }
     }
 
-    String text() {
-        return text;
-    }
-
     private String[] split() {
         if (splitCache != null) return splitCache;
         var translated = CC.translate(text);
