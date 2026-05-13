@@ -30,11 +30,17 @@ final class BoardEntry {
         var prefix = split[0].length() <= max ? split[0] : split[0].substring(0, max);
         var suffix = split[1].length() <= max ? split[1] : split[1].substring(0, max);
 
-        if (!prefix.equals(team.getPrefix())) team.setPrefix(prefix);
-        if (!suffix.equals(team.getSuffix())) team.setSuffix(suffix);
+        if (!prefix.equals(team.getPrefix())) {
+            team.setPrefix(prefix);
+        }
+        if (!suffix.equals(team.getSuffix())) {
+            team.setSuffix(suffix);
+        }
 
         var score = board.objective().getScore(key);
-        if (score.getScore() != position) score.setScore(position);
+        if (score.getScore() != position) {
+            score.setScore(position);
+        }
     }
 
     void remove() {
@@ -52,7 +58,9 @@ final class BoardEntry {
     }
 
     private String[] split() {
-        if (splitCache != null) return splitCache;
+        if (splitCache != null) {
+            return splitCache;
+        }
         var translated = CC.translate(text);
         int unit = Board.segmentMax();
 

@@ -32,7 +32,9 @@ public final class BoardManager implements Runnable {
 
         boards.entrySet().removeIf(entry -> {
             var player = server.getPlayer(entry.getKey());
-            if (player == null || !player.isOnline()) return true;
+            if (player == null || !player.isOnline()) {
+                return true;
+            }
             try {
                 updateBoard(player, entry.getValue());
             } catch (Exception ex) {
@@ -45,7 +47,9 @@ public final class BoardManager implements Runnable {
     @SuppressWarnings("deprecation")
     private void updateBoard(Player player, Board board) {
         var lines = adapter.getLines(player, board);
-        if (lines == null) lines = List.of();
+        if (lines == null) {
+            lines = List.of();
+        }
 
         var newTitle = board.clipTitle(adapter.getTitle(player));
         if (!Objects.equals(newTitle, board.lastTitle())) {
@@ -80,12 +84,16 @@ public final class BoardManager implements Runnable {
     }
 
     public void createBoard(Player player) {
-        if (player.hasMetadata(SKIP_BOARD_METADATA) || boards.containsKey(player.getUniqueId())) return;
+        if (player.hasMetadata(SKIP_BOARD_METADATA) || boards.containsKey(player.getUniqueId())) {
+            return;
+        }
         boards.put(player.getUniqueId(), new Board(player, adapter));
     }
 
     public void removeBoard(Player player) {
-        if (player.hasMetadata(SKIP_BOARD_METADATA)) return;
+        if (player.hasMetadata(SKIP_BOARD_METADATA)) {
+            return;
+        }
         boards.remove(player.getUniqueId());
     }
 }

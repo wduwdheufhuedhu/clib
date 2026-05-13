@@ -64,7 +64,9 @@ public final class Board {
                 : "";
         for (var base : ENTRY_KEYS) {
             var key = base + suffix;
-            if (usedKeys.add(key)) return key;
+            if (usedKeys.add(key)) {
+                return key;
+            }
         }
         throw new IllegalStateException("No free board entry keys (max " + ENTRY_KEYS.length + ")");
     }
