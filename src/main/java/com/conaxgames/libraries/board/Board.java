@@ -41,6 +41,7 @@ public final class Board {
     private final Objective objective;
     @Setter(AccessLevel.PACKAGE)
     private volatile String lastTitle;
+    @Getter(AccessLevel.PACKAGE)
     private static int segmentMax = LEGACY ? 16 : 64;
     private static int titleMax = LEGACY ? 32 : 1024;
 
