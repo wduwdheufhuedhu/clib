@@ -74,25 +74,23 @@ public class ItemBuilderUtil {
     @SuppressWarnings("deprecation")
     public ItemBuilderUtil(XMaterial material, int amount, byte durability) {
         if (durability == 0) {
-            ItemStack stack = material.parseItem();
-            if (stack == null) {
+            this.is = material.parseItem();
+            if (this.is == null) {
                 throw new IllegalArgumentException("Unsupported material: " + material);
             }
-            stack.setAmount(amount);
-            is = stack;
+            this.is.setAmount(amount);
             return;
         }
-        is = XMaterial.matchXMaterial(material.name() + ':' + durability)
+        this.is = XMaterial.matchXMaterial(material.name() + ':' + durability)
                 .map(XMaterial::parseItem)
-                .orElse(null);
-        if (is == null) {
-            Material parsed = material.get();
-            if (parsed == null) {
-                throw new IllegalArgumentException("Unsupported material: " + material);
-            }
-            is = new ItemStack(parsed, amount, durability);
-        }
-        is.setAmount(amount);
+                .orElseGet(() -> {
+                    Material parsed = material.get();
+                    if (parsed == null) {
+                        throw new IllegalArgumentException("Unsupported material: " + material);
+                    }
+                    return new ItemStack(parsed, amount, durability);
+                });
+        this.is.setAmount(amount);
     }
 
     private ItemBuilderUtil edit(Consumer<ItemMeta> action) {
@@ -290,7 +288,7 @@ public class ItemBuilderUtil {
     public ItemBuilderUtil setFlags(ItemFlag... flags) {
         return edit(meta -> {
             for (ItemFlag flag : flags) {
-                XItemFlag.of(flag).ifPresent(x -> x.set(meta));
+                XItemFlag.of(flag).set(meta);
             }
         });
     }
@@ -306,7 +304,7 @@ public class ItemBuilderUtil {
     public ItemBuilderUtil removeFlags(ItemFlag... flags) {
         return edit(meta -> {
             for (ItemFlag flag : flags) {
-                XItemFlag.of(flag).ifPresent(x -> x.removeFrom(meta));
+                XItemFlag.of(flag).removeFrom(meta);
             }
         });
     }
