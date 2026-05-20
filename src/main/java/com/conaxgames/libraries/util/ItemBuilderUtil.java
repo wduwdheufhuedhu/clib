@@ -51,6 +51,7 @@ public class ItemBuilderUtil {
         is = stack;
     }
 
+    @SuppressWarnings("deprecation")
     public ItemBuilderUtil(Material m, int amount, byte durability) {
         if (durability == 0) {
             is = new ItemStack(m, amount);
@@ -67,6 +68,7 @@ public class ItemBuilderUtil {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public ItemBuilderUtil(XMaterial material, int amount, byte durability) {
         Material parsed = material.get();
         if (parsed == null) {
@@ -75,7 +77,7 @@ public class ItemBuilderUtil {
         if (durability == 0) {
             is = new ItemStack(parsed, amount);
         } else {
-            ItemStack matched = XMaterial.matchXMaterial(parsed.name() + ':' + durability)
+            ItemStack matched = XMaterial.matchXMaterial(material.name() + ':' + durability)
                     .map(XMaterial::parseItem)
                     .orElse(null);
             if (matched != null) {
@@ -126,7 +128,7 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil setSkullOwner(String name) {
-        if (XMaterial.matchXMaterial(is) != XMaterial.PLAYER_HEAD) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
             return this;
         }
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
@@ -138,7 +140,7 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil setSkullOwner(OfflinePlayer offlinePlayer) {
-        if (XMaterial.matchXMaterial(is) != XMaterial.PLAYER_HEAD) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
             return this;
         }
         XSkull.of(is).profile(Profileable.of(offlinePlayer)).lenient().apply();
@@ -146,7 +148,7 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil setSkullOwner(UUID uuid) {
-        if (XMaterial.matchXMaterial(is) != XMaterial.PLAYER_HEAD) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
             return this;
         }
         XSkull.of(is).profile(Profileable.of(uuid)).lenient().apply();
@@ -154,7 +156,7 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil setSkullProfile(String texture) {
-        if (XMaterial.matchXMaterial(is) != XMaterial.PLAYER_HEAD) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
             return this;
         }
         XSkull.of(is).profile(Profileable.detect(texture)).lenient().apply();
@@ -251,10 +253,8 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil setDyeColor(DyeColor color) {
-        XMaterial current = XMaterial.matchXMaterial(is);
-        byte data = (byte) color.getWoolData();
-        String base = current.getLegacy().length > 0 ? current.getLegacy()[0] : current.name();
-        XMaterial.matchXMaterial(base + ':' + data).ifPresent(xm -> xm.setType(is));
+        XMaterial.matchXMaterial(color.name() + "_WOOL")
+                .ifPresent(xm -> xm.setType(is));
         return this;
     }
 
@@ -273,7 +273,7 @@ public class ItemBuilderUtil {
     public ItemBuilderUtil setFlags(ItemFlag... flags) {
         return edit(meta -> {
             for (ItemFlag flag : flags) {
-                XItemFlag.of(flag).ifPresent(xFlag -> xFlag.set(meta));
+                XItemFlag.of(flag).set(meta);
             }
         });
     }
@@ -289,7 +289,7 @@ public class ItemBuilderUtil {
     public ItemBuilderUtil removeFlags(ItemFlag... flags) {
         return edit(meta -> {
             for (ItemFlag flag : flags) {
-                XItemFlag.of(flag).ifPresent(xFlag -> xFlag.removeFrom(meta));
+                XItemFlag.of(flag).removeFrom(meta);
             }
         });
     }
@@ -329,18 +329,17 @@ public class ItemBuilderUtil {
 
     public ItemBuilderUtil setGlow(boolean glow) {
         return edit(meta -> {
-            Enchantment unbreaking = XEnchantment.UNBREAKING.get();
-            if (unbreaking == null) {
+            if (glow) {
+                meta.setEnchantmentGlintOverride(true);
                 return;
             }
-            if (glow) {
-                meta.addEnchant(unbreaking, 1, true);
-                XItemFlag.HIDE_ENCHANTS.set(meta);
-            } else {
+            meta.setEnchantmentGlintOverride(null);
+            Enchantment unbreaking = XEnchantment.UNBREAKING.get();
+            if (unbreaking != null) {
                 meta.removeEnchant(unbreaking);
-                if (!meta.hasEnchants()) {
-                    XItemFlag.HIDE_ENCHANTS.removeFrom(meta);
-                }
+            }
+            if (!meta.hasEnchants()) {
+                XItemFlag.HIDE_ENCHANTS.removeFrom(meta);
             }
         });
     }
