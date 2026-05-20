@@ -39,7 +39,13 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil(Material m, int amount) {
-        is = new ItemStack(m, amount);
+        ItemStack stack = XMaterial.matchXMaterial(m).parseItem();
+        if (stack == null) {
+            stack = new ItemStack(m, amount);
+        } else {
+            stack.setAmount(amount);
+        }
+        is = stack;
     }
 
     public ItemBuilderUtil(XMaterial material, int amount) {
@@ -54,39 +60,39 @@ public class ItemBuilderUtil {
     @SuppressWarnings("deprecation")
     public ItemBuilderUtil(Material m, int amount, byte durability) {
         if (durability == 0) {
-            is = new ItemStack(m, amount);
+            ItemStack stack = XMaterial.matchXMaterial(m).parseItem();
+            is = stack != null ? stack : new ItemStack(m, amount);
         } else {
-            ItemStack matched = XMaterial.matchXMaterial(m.name() + ':' + durability)
+            ItemStack stack = XMaterial.matchXMaterial(m.name() + ':' + durability)
                     .map(XMaterial::parseItem)
                     .orElse(null);
-            if (matched != null) {
-                matched.setAmount(amount);
-                is = matched;
-            } else {
-                is = new ItemStack(m, amount, durability);
-            }
+            is = stack != null ? stack : new ItemStack(m, amount, durability);
         }
+        is.setAmount(amount);
     }
 
     @SuppressWarnings("deprecation")
     public ItemBuilderUtil(XMaterial material, int amount, byte durability) {
-        Material parsed = material.get();
-        if (parsed == null) {
-            throw new IllegalArgumentException("Unsupported material: " + material);
-        }
         if (durability == 0) {
-            is = new ItemStack(parsed, amount);
-        } else {
-            ItemStack matched = XMaterial.matchXMaterial(material.name() + ':' + durability)
-                    .map(XMaterial::parseItem)
-                    .orElse(null);
-            if (matched != null) {
-                matched.setAmount(amount);
-                is = matched;
-            } else {
-                is = new ItemStack(parsed, amount, durability);
+            ItemStack stack = material.parseItem();
+            if (stack == null) {
+                throw new IllegalArgumentException("Unsupported material: " + material);
             }
+            stack.setAmount(amount);
+            is = stack;
+            return;
         }
+        is = XMaterial.matchXMaterial(material.name() + ':' + durability)
+                .map(XMaterial::parseItem)
+                .orElse(null);
+        if (is == null) {
+            Material parsed = material.get();
+            if (parsed == null) {
+                throw new IllegalArgumentException("Unsupported material: " + material);
+            }
+            is = new ItemStack(parsed, amount, durability);
+        }
+        is.setAmount(amount);
     }
 
     private ItemBuilderUtil edit(Consumer<ItemMeta> action) {
@@ -115,16 +121,27 @@ public class ItemBuilderUtil {
         return this;
     }
 
+    public ItemBuilderUtil addUnsafeEnchantment(XEnchantment enchantment, int level) {
+        Enchantment ench = enchantment.get();
+        return ench == null ? this : addUnsafeEnchantment(ench, level);
+    }
+
     public ItemBuilderUtil addUnsafeEnchantmentIf(boolean condition, Enchantment ench, int level) {
-        if (condition) {
-            return addUnsafeEnchantment(ench, level);
-        }
-        return this;
+        return condition ? addUnsafeEnchantment(ench, level) : this;
+    }
+
+    public ItemBuilderUtil addUnsafeEnchantmentIf(boolean condition, XEnchantment enchantment, int level) {
+        return condition ? addUnsafeEnchantment(enchantment, level) : this;
     }
 
     public ItemBuilderUtil removeEnchantment(Enchantment ench) {
         is.removeEnchantment(ench);
         return this;
+    }
+
+    public ItemBuilderUtil removeEnchantment(XEnchantment enchantment) {
+        Enchantment ench = enchantment.get();
+        return ench == null ? this : removeEnchantment(ench);
     }
 
     public ItemBuilderUtil setSkullOwner(String name) {
@@ -169,7 +186,7 @@ public class ItemBuilderUtil {
 
     public ItemBuilderUtil addEnchant(XEnchantment enchantment, int level) {
         Enchantment ench = enchantment.get();
-        return ench == null ? this : addEnchant(ench, level);
+        return ench == null ? this : edit(meta -> meta.addEnchant(ench, level, true));
     }
 
     public ItemBuilderUtil addEnchantments(Map<Enchantment, Integer> enchantments) {
@@ -273,7 +290,7 @@ public class ItemBuilderUtil {
     public ItemBuilderUtil setFlags(ItemFlag... flags) {
         return edit(meta -> {
             for (ItemFlag flag : flags) {
-                XItemFlag.of(flag).set(meta);
+                XItemFlag.of(flag).ifPresent(x -> x.set(meta));
             }
         });
     }
@@ -289,7 +306,7 @@ public class ItemBuilderUtil {
     public ItemBuilderUtil removeFlags(ItemFlag... flags) {
         return edit(meta -> {
             for (ItemFlag flag : flags) {
-                XItemFlag.of(flag).removeFrom(meta);
+                XItemFlag.of(flag).ifPresent(x -> x.removeFrom(meta));
             }
         });
     }
@@ -329,12 +346,14 @@ public class ItemBuilderUtil {
 
     public ItemBuilderUtil setGlow(boolean glow) {
         return edit(meta -> {
+            Enchantment unbreaking = XEnchantment.UNBREAKING.get();
             if (glow) {
-                meta.setEnchantmentGlintOverride(true);
+                if (unbreaking != null) {
+                    meta.addEnchant(unbreaking, 1, true);
+                }
+                XItemFlag.HIDE_ENCHANTS.set(meta);
                 return;
             }
-            meta.setEnchantmentGlintOverride(null);
-            Enchantment unbreaking = XEnchantment.UNBREAKING.get();
             if (unbreaking != null) {
                 meta.removeEnchant(unbreaking);
             }
