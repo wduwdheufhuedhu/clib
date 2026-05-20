@@ -17,208 +17,222 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class ItemBuilderUtil {
 
-    private final ItemStack is;
+    private final ItemStack itemStack;
 
-    public ItemBuilderUtil(Material m) {
-        this(m, 1);
+    public ItemBuilderUtil(Material material) {
+        this(material, 1);
     }
 
     public ItemBuilderUtil(XMaterial material) {
         this(material, 1);
     }
 
-    public ItemBuilderUtil(ItemStack is) {
-        this.is = is;
+    public ItemBuilderUtil(ItemStack itemStack) {
+        this.itemStack = itemStack;
     }
 
-    public ItemBuilderUtil(Material m, int amount) {
-        ItemStack stack = XMaterial.matchXMaterial(m).parseItem();
-        if (stack == null) {
-            stack = new ItemStack(m, amount);
+    public ItemBuilderUtil(Material material, int amount) {
+        ItemStack parsed = XMaterial.matchXMaterial(material).parseItem();
+        if (parsed != null) {
+            parsed.setAmount(amount);
+            this.itemStack = parsed;
         } else {
-            stack.setAmount(amount);
+            this.itemStack = new ItemStack(material, amount);
         }
-        is = stack;
     }
 
     public ItemBuilderUtil(XMaterial material, int amount) {
-        ItemStack stack = material.parseItem();
-        if (stack == null) {
+        ItemStack parsed = material.parseItem();
+        if (parsed == null) {
             throw new IllegalArgumentException("Unsupported material: " + material);
         }
-        stack.setAmount(amount);
-        is = stack;
+        parsed.setAmount(amount);
+        this.itemStack = parsed;
     }
 
     @SuppressWarnings("deprecation")
-    public ItemBuilderUtil(Material m, int amount, byte durability) {
+    public ItemBuilderUtil(Material material, int amount, byte durability) {
         if (durability == 0) {
-            ItemStack stack = XMaterial.matchXMaterial(m).parseItem();
-            is = stack != null ? stack : new ItemStack(m, amount);
-        } else {
-            ItemStack stack = XMaterial.matchXMaterial(m.name() + ':' + durability)
-                    .map(XMaterial::parseItem)
-                    .orElse(null);
-            is = stack != null ? stack : new ItemStack(m, amount, durability);
+            ItemStack parsed = XMaterial.matchXMaterial(material).parseItem();
+            if (parsed != null) {
+                parsed.setAmount(amount);
+                this.itemStack = parsed;
+            } else {
+                this.itemStack = new ItemStack(material, amount);
+            }
+            return;
         }
-        is.setAmount(amount);
+        ItemStack parsed = XMaterial.matchXMaterial(material.name() + ':' + durability)
+                .map(XMaterial::parseItem)
+                .orElse(null);
+        if (parsed != null) {
+            parsed.setAmount(amount);
+            this.itemStack = parsed;
+        } else {
+            this.itemStack = new ItemStack(material, amount, durability);
+        }
     }
 
     @SuppressWarnings("deprecation")
     public ItemBuilderUtil(XMaterial material, int amount, byte durability) {
         if (durability == 0) {
-            this.is = material.parseItem();
-            if (this.is == null) {
+            ItemStack parsed = material.parseItem();
+            if (parsed == null) {
                 throw new IllegalArgumentException("Unsupported material: " + material);
             }
-            this.is.setAmount(amount);
+            parsed.setAmount(amount);
+            this.itemStack = parsed;
             return;
         }
-        this.is = XMaterial.matchXMaterial(material.name() + ':' + durability)
+        ItemStack parsed = XMaterial.matchXMaterial(material.name() + ':' + durability)
                 .map(XMaterial::parseItem)
                 .orElseGet(() -> {
-                    Material parsed = material.get();
-                    if (parsed == null) {
+                    Material legacy = material.get();
+                    if (legacy == null) {
                         throw new IllegalArgumentException("Unsupported material: " + material);
                     }
-                    return new ItemStack(parsed, amount, durability);
+                    return new ItemStack(legacy, amount, durability);
                 });
-        this.is.setAmount(amount);
-    }
-
-    private ItemBuilderUtil edit(Consumer<ItemMeta> action) {
-        is.editMeta(action);
-        return this;
+        parsed.setAmount(amount);
+        this.itemStack = parsed;
     }
 
     public ItemBuilderUtil clone() {
-        return new ItemBuilderUtil(is.clone());
+        return new ItemBuilderUtil(itemStack.clone());
     }
 
     @SuppressWarnings("deprecation")
     public ItemBuilderUtil setDurability(short durability) {
-        if (!is.editMeta(Damageable.class, meta -> meta.setDamage(durability))) {
-            is.setDurability(durability);
+        if (!itemStack.editMeta(Damageable.class, meta -> meta.setDamage(durability))) {
+            itemStack.setDurability(durability);
         }
         return this;
     }
 
     public ItemBuilderUtil setName(String name) {
-        return edit(meta -> meta.setDisplayName(CC.translate(name)));
+        itemStack.editMeta(meta -> meta.setDisplayName(CC.translate(name)));
+        return this;
     }
 
-    public ItemBuilderUtil addUnsafeEnchantment(Enchantment ench, int level) {
-        is.addUnsafeEnchantment(ench, level);
+    public ItemBuilderUtil addUnsafeEnchantment(Enchantment enchantment, int level) {
+        itemStack.addUnsafeEnchantment(enchantment, level);
         return this;
     }
 
     public ItemBuilderUtil addUnsafeEnchantment(XEnchantment enchantment, int level) {
-        Enchantment ench = enchantment.get();
-        return ench == null ? this : addUnsafeEnchantment(ench, level);
+        Enchantment resolved = enchantment.get();
+        return resolved == null ? this : addUnsafeEnchantment(resolved, level);
     }
 
-    public ItemBuilderUtil addUnsafeEnchantmentIf(boolean condition, Enchantment ench, int level) {
-        return condition ? addUnsafeEnchantment(ench, level) : this;
+    public ItemBuilderUtil addUnsafeEnchantmentIf(boolean condition, Enchantment enchantment, int level) {
+        return condition ? addUnsafeEnchantment(enchantment, level) : this;
     }
 
     public ItemBuilderUtil addUnsafeEnchantmentIf(boolean condition, XEnchantment enchantment, int level) {
         return condition ? addUnsafeEnchantment(enchantment, level) : this;
     }
 
-    public ItemBuilderUtil removeEnchantment(Enchantment ench) {
-        is.removeEnchantment(ench);
+    public ItemBuilderUtil removeEnchantment(Enchantment enchantment) {
+        itemStack.removeEnchantment(enchantment);
         return this;
     }
 
     public ItemBuilderUtil removeEnchantment(XEnchantment enchantment) {
-        Enchantment ench = enchantment.get();
-        return ench == null ? this : removeEnchantment(ench);
+        Enchantment resolved = enchantment.get();
+        return resolved == null ? this : removeEnchantment(resolved);
     }
 
     public ItemBuilderUtil setSkullOwner(String name) {
-        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(itemStack)) {
             return this;
         }
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
         Profileable profile = offlinePlayer.hasPlayedBefore()
                 ? Profileable.of(offlinePlayer)
                 : Profileable.username(name);
-        XSkull.of(is).profile(profile).lenient().apply();
+        XSkull.of(itemStack).profile(profile).lenient().apply();
         return this;
     }
 
     public ItemBuilderUtil setSkullOwner(OfflinePlayer offlinePlayer) {
-        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(itemStack)) {
             return this;
         }
-        XSkull.of(is).profile(Profileable.of(offlinePlayer)).lenient().apply();
+        XSkull.of(itemStack).profile(Profileable.of(offlinePlayer)).lenient().apply();
         return this;
     }
 
     public ItemBuilderUtil setSkullOwner(UUID uuid) {
-        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(itemStack)) {
             return this;
         }
-        XSkull.of(is).profile(Profileable.of(uuid)).lenient().apply();
+        XSkull.of(itemStack).profile(Profileable.of(uuid)).lenient().apply();
         return this;
     }
 
     public ItemBuilderUtil setSkullProfile(String texture) {
-        if (!XMaterial.PLAYER_HEAD.isSimilar(is)) {
+        if (!XMaterial.PLAYER_HEAD.isSimilar(itemStack)) {
             return this;
         }
-        XSkull.of(is).profile(Profileable.detect(texture)).lenient().apply();
+        XSkull.of(itemStack).profile(Profileable.detect(texture)).lenient().apply();
         return this;
     }
 
-    public ItemBuilderUtil addEnchant(Enchantment ench, int level) {
-        return edit(meta -> meta.addEnchant(ench, level, true));
+    public ItemBuilderUtil addEnchant(Enchantment enchantment, int level) {
+        itemStack.editMeta(meta -> meta.addEnchant(enchantment, level, true));
+        return this;
     }
 
     public ItemBuilderUtil addEnchant(XEnchantment enchantment, int level) {
-        Enchantment ench = enchantment.get();
-        return ench == null ? this : edit(meta -> meta.addEnchant(ench, level, true));
+        Enchantment resolved = enchantment.get();
+        return resolved == null ? this : addEnchant(resolved, level);
     }
 
     public ItemBuilderUtil addEnchantments(Map<Enchantment, Integer> enchantments) {
-        is.addEnchantments(enchantments);
+        itemStack.addEnchantments(enchantments);
         return this;
     }
 
     public ItemBuilderUtil setInfinityDurability() {
-        return setDurability(Short.MAX_VALUE);
+        if (!itemStack.editMeta(Damageable.class, meta -> meta.setDamage(Short.MAX_VALUE))) {
+            itemStack.setDurability(Short.MAX_VALUE);
+        }
+        return this;
     }
 
     public ItemBuilderUtil setLore(String... lore) {
-        return edit(meta -> meta.setLore(CC.translate(lore)));
+        itemStack.editMeta(meta -> meta.setLore(CC.translate(Arrays.asList(lore))));
+        return this;
     }
 
     public ItemBuilderUtil setLore(List<String> lore) {
-        return edit(meta -> meta.setLore(CC.translate(lore)));
+        itemStack.editMeta(meta -> meta.setLore(CC.translate(lore)));
+        return this;
     }
 
     public ItemBuilderUtil removeLoreLine(String line) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             List<String> lore = meta.getLore();
             if (lore == null) {
                 return;
             }
             lore = new ArrayList<>(lore);
-            if (lore.remove(line)) {
+            if (lore.remove(CC.translate(line))) {
                 meta.setLore(lore);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil removeLoreLine(int index) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             List<String> lore = meta.getLore();
             if (lore == null) {
                 return;
@@ -229,15 +243,17 @@ public class ItemBuilderUtil {
                 meta.setLore(lore);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil addLoreLine(String line) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             List<String> lore = meta.getLore();
             lore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
             lore.add(CC.translate(line));
             meta.setLore(lore);
         });
+        return this;
     }
 
     public ItemBuilderUtil addLoreLineIf(boolean condition, String line) {
@@ -245,16 +261,17 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil addLoreLineList(List<String> lines) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             List<String> lore = meta.getLore();
             lore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
             lore.addAll(CC.translate(lines));
             meta.setLore(lore);
         });
+        return this;
     }
 
     public ItemBuilderUtil addLoreLine(String line, int pos) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             List<String> lore = meta.getLore();
             if (lore == null) {
                 return;
@@ -265,77 +282,88 @@ public class ItemBuilderUtil {
                 meta.setLore(lore);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil setDyeColor(DyeColor color) {
         XMaterial.matchXMaterial(color.name() + "_WOOL")
-                .ifPresent(xm -> xm.setType(is));
+                .ifPresent(xm -> xm.setType(itemStack));
         return this;
     }
 
     public ItemBuilderUtil setLeatherArmorColor(Color color) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             if (meta instanceof LeatherArmorMeta leather) {
                 leather.setColor(color);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil setUnbreakable() {
-        return edit(meta -> meta.setUnbreakable(true));
+        itemStack.editMeta(meta -> meta.setUnbreakable(true));
+        return this;
     }
 
     public ItemBuilderUtil setFlags(ItemFlag... flags) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             for (ItemFlag flag : flags) {
                 XItemFlag.of(flag).set(meta);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil setFlags(XItemFlag... flags) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             for (XItemFlag flag : flags) {
                 flag.set(meta);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil removeFlags(ItemFlag... flags) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             for (ItemFlag flag : flags) {
                 XItemFlag.of(flag).removeFrom(meta);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil removeFlags(XItemFlag... flags) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             for (XItemFlag flag : flags) {
                 flag.removeFrom(meta);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil hideAttributes() {
-        return edit(meta -> XItemFlag.HIDE_ATTRIBUTES.set(meta));
+        itemStack.editMeta(meta -> XItemFlag.HIDE_ATTRIBUTES.set(meta));
+        return this;
     }
 
     public ItemBuilderUtil hideEnchants() {
-        return edit(meta -> XItemFlag.HIDE_ENCHANTS.set(meta));
+        itemStack.editMeta(meta -> XItemFlag.HIDE_ENCHANTS.set(meta));
+        return this;
     }
 
     public ItemBuilderUtil showAttributes() {
-        return edit(meta -> XItemFlag.HIDE_ATTRIBUTES.removeFrom(meta));
+        itemStack.editMeta(meta -> XItemFlag.HIDE_ATTRIBUTES.removeFrom(meta));
+        return this;
     }
 
     public ItemBuilderUtil setAmount(int amount) {
-        is.setAmount(amount);
+        itemStack.setAmount(amount);
         return this;
     }
 
     public ItemBuilderUtil setCustomModelData(int modelData) {
-        return edit(meta -> meta.setCustomModelData(modelData));
+        itemStack.editMeta(meta -> meta.setCustomModelData(modelData));
+        return this;
     }
 
     public ItemBuilderUtil setGlow() {
@@ -343,7 +371,7 @@ public class ItemBuilderUtil {
     }
 
     public ItemBuilderUtil setGlow(boolean glow) {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             Enchantment unbreaking = XEnchantment.UNBREAKING.get();
             if (glow) {
                 if (unbreaking != null) {
@@ -359,21 +387,19 @@ public class ItemBuilderUtil {
                 XItemFlag.HIDE_ENCHANTS.removeFrom(meta);
             }
         });
+        return this;
     }
 
     public ItemBuilderUtil setUnstackable() {
-        return edit(meta -> {
+        itemStack.editMeta(meta -> {
             PersistentDataContainer container = meta.getPersistentDataContainer();
             NamespacedKey key = new NamespacedKey("conaxgames", "unstackable");
             container.set(key, PersistentDataType.STRING, UUID.randomUUID().toString());
         });
+        return this;
     }
 
     public ItemStack toItemStack() {
-        return is;
-    }
-
-    public ItemStack build() {
-        return is;
+        return itemStack;
     }
 }
