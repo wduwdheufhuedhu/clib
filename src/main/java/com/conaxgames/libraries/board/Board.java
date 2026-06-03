@@ -17,9 +17,6 @@ import java.util.Set;
 @SuppressWarnings("deprecation")
 public final class Board {
 
-    private static final boolean LEGACY_TEAM = VersioningChecker.getInstance().isServerVersionBefore("1.13");
-    private static final boolean LEGACY_TITLE = VersioningChecker.getInstance().isServerVersionBefore("1.18");
-
     private static final String[] ENTRY_KEYS;
 
     static {
@@ -49,11 +46,11 @@ public final class Board {
     }
 
     static int segmentMax() {
-        return LEGACY_TEAM ? 16 : 64;
+        return VersioningChecker.getInstance().isServerVersionBefore("1.13") ? 16 : 64;
     }
 
     static int titleMax() {
-        return LEGACY_TITLE ? 32 : 1024;
+        return VersioningChecker.getInstance().isServerVersionBefore("1.18") ? 32 : 1024;
     }
 
     public Scoreboard scoreboard() {
