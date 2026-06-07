@@ -67,7 +67,7 @@ public final class Board {
 
     String allocateKey(String text) {
         var suffix = text.length() > segmentMax()
-                ? CC.getLastColors(text.substring(0, segmentMax()))
+                ? CC.getLastColors(text.substring(0, CC.safeSplitIndex(text, segmentMax())))
                 : "";
         for (var base : ENTRY_KEYS) {
             var key = base + suffix;

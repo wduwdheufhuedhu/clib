@@ -73,7 +73,79 @@ public final class CC {
     }
 
     public static String getLastColors(String input) {
-        return ChatColor.getLastColors(input);
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
+
+        String colors = "";
+        String formats = "";
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) != SECTION || i + 1 >= input.length()) {
+                continue;
+            }
+            char code = Character.toLowerCase(input.charAt(i + 1));
+            if (code == 'x' && isHexSequence(input, i)) {
+                colors = input.substring(i, i + 14);
+                formats = "";
+                i += 13;
+                continue;
+            }
+            if ("0123456789abcdef".indexOf(code) >= 0) {
+                colors = input.substring(i, i + 2);
+                formats = "";
+                i++;
+                continue;
+            }
+            if ("klmor".indexOf(code) >= 0) {
+                formats += input.substring(i, i + 2);
+                i++;
+            }
+        }
+        return colors + formats;
+    }
+
+    public static int safeSplitIndex(String translated, int max) {
+        int at = Math.min(max, translated.length());
+        while (at > 0 && isInsideFormatCode(translated, at)) {
+            at--;
+        }
+        return at;
+    }
+
+    private static boolean isInsideFormatCode(String text, int index) {
+        if (index <= 0 || index > text.length()) {
+            return false;
+        }
+        for (int i = index - 1; i >= Math.max(0, index - 13); i--) {
+            if (text.charAt(i) != SECTION) {
+                continue;
+            }
+            if (i + 1 < text.length() && text.charAt(i + 1) == 'x' && isHexSequence(text, i)) {
+                return index > i && index < i + 14;
+            }
+            if (index == i + 1 && i + 1 < text.length()) {
+                char code = Character.toLowerCase(text.charAt(i + 1));
+                if ("0123456789abcdefklmor".indexOf(code) >= 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isHexSequence(String text, int start) {
+        if (start + 13 >= text.length()) {
+            return false;
+        }
+        if (text.charAt(start) != SECTION || text.charAt(start + 1) != 'x') {
+            return false;
+        }
+        for (int i = start + 2; i <= start + 13; i += 2) {
+            if (text.charAt(i) != SECTION) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String translateHex(String message) {
