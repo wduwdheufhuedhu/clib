@@ -351,6 +351,15 @@ public class ItemBuilderUtil {
         return this;
     }
 
+    public ItemBuilderUtil hideTooltipExtras() {
+        itemStack.editMeta(meta -> {
+            XItemFlag.HIDE_ATTRIBUTES.set(meta);
+            XItemFlag.HIDE_ENCHANTS.set(meta);
+            XItemFlag.HIDE_ADDITIONAL_TOOLTIP.set(meta);
+        });
+        return this;
+    }
+
     public ItemBuilderUtil showAttributes() {
         itemStack.editMeta(meta -> XItemFlag.HIDE_ATTRIBUTES.removeFrom(meta));
         return this;
