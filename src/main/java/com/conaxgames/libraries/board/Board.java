@@ -33,15 +33,19 @@ public final class Board {
     private final Objective objective;
     private volatile String lastTitle;
 
-    Board(Player player, BoardAdapter adapter) {
-        var manager = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
-        this.scoreboard = player.getScoreboard().equals(manager.getMainScoreboard())
-                ? manager.getNewScoreboard()
+    Board(Player player, BoardManager manager) {
+        var scoreboardManager = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();
+        this.scoreboard = player.getScoreboard().equals(scoreboardManager.getMainScoreboard())
+                ? scoreboardManager.getNewScoreboard()
                 : player.getScoreboard();
 
+        var existing = scoreboard.getObjective("sb");
+        if (existing != null) {
+            existing.unregister();
+        }
         this.objective = scoreboard.registerNewObjective("sb", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        this.lastTitle = clipTitle(adapter.getTitle(player));
+        this.lastTitle = clipTitle(manager.title(player));
         objective.setDisplayName(lastTitle);
     }
 
@@ -65,12 +69,8 @@ public final class Board {
         objective.setDisplayName(clipped);
     }
 
-    String allocateKey(String text) {
-        var suffix = text.length() > segmentMax()
-                ? CC.getLastColors(text.substring(0, segmentMax()))
-                : "";
-        for (var base : ENTRY_KEYS) {
-            var key = base + suffix;
+    String allocateKey() {
+        for (var key : ENTRY_KEYS) {
             if (usedKeys.add(key)) {
                 return key;
             }

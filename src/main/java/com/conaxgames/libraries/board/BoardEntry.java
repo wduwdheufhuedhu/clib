@@ -19,7 +19,7 @@ final class BoardEntry {
     BoardEntry(Board board, String text) {
         this.board = board;
         this.text = text != null ? text : "";
-        this.key = board.allocateKey(this.text);
+        this.key = board.allocateKey();
         this.team = board.scoreboard().registerNewTeam("board_" + TEAM_COUNTER.getAndIncrement());
         team.addEntry(key);
     }

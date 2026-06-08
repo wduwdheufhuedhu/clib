@@ -70,7 +70,7 @@ public class LibraryPlugin {
 
     public void setBoardManager(BoardManager boardManager) {
         this.boardManager = boardManager;
-        long interval = this.boardManager.adapter().getInterval();
+        long interval = this.boardManager.getInterval();
         this.scheduler.runTaskTimer(this.plugin, this.boardManager, 0L, interval);
     }
 

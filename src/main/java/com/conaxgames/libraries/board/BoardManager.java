@@ -2,31 +2,53 @@ package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.LibraryPlugin;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public final class BoardManager implements Runnable {
 
     public static final String SKIP_BOARD_METADATA = "cElement";
 
     private final Map<UUID, Board> boards = new ConcurrentHashMap<>();
-    private final BoardAdapter adapter;
 
-    public BoardManager(BoardAdapter adapter) {
-        this.adapter = Objects.requireNonNull(adapter);
+    private final Function<Player, String> title;
+    private final Function<Player, List<String>> lines;
+    private final long interval;
+    private final BiConsumer<Player, Scoreboard> onCreate;
+    private final Runnable preUpdate;
+    private final String skipMetadata;
+
+    private BoardManager(Builder builder) {
+        this.title = builder.title;
+        this.lines = builder.lines;
+        this.interval = builder.interval;
+        this.onCreate = builder.onCreate;
+        this.preUpdate = builder.preUpdate;
+        this.skipMetadata = builder.skipMetadata;
     }
 
-    public BoardAdapter adapter() {
-        return adapter;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
+    String title(Player player) {
+        return title.apply(player);
     }
 
     @Override
     public void run() {
-        adapter.preLoop();
+        preUpdate.run();
         var server = LibraryPlugin.getInstance().getPlugin().getServer();
         var logger = LibraryPlugin.getInstance().getPlugin().getLogger();
 
@@ -45,8 +67,8 @@ public final class BoardManager implements Runnable {
     }
 
     private void updateBoard(Player player, Board board) {
-        var lines = Objects.requireNonNullElse(adapter.getLines(player, board), List.<String>of());
-        board.refreshTitle(board.clipTitle(adapter.getTitle(player)));
+        var lines = Objects.requireNonNullElse(this.lines.apply(player), List.<String>of());
+        board.refreshTitle(board.clipTitle(title.apply(player)));
 
         var entries = board.entries();
         while (entries.size() > lines.size()) {
@@ -71,21 +93,68 @@ public final class BoardManager implements Runnable {
         var sb = board.scoreboard();
         if (!player.getScoreboard().equals(sb)) {
             player.setScoreboard(sb);
-            adapter.onScoreboardCreate(player, sb);
+            onCreate.accept(player, sb);
         }
     }
 
     public void createBoard(Player player) {
-        if (player.hasMetadata(SKIP_BOARD_METADATA) || boards.containsKey(player.getUniqueId())) {
+        if (player.hasMetadata(skipMetadata) || boards.containsKey(player.getUniqueId())) {
             return;
         }
-        boards.put(player.getUniqueId(), new Board(player, adapter));
+        boards.put(player.getUniqueId(), new Board(player, this));
     }
 
     public void removeBoard(Player player) {
-        if (player.hasMetadata(SKIP_BOARD_METADATA)) {
+        if (player.hasMetadata(skipMetadata)) {
             return;
         }
         boards.remove(player.getUniqueId());
+    }
+
+    public static final class Builder {
+
+        private Function<Player, String> title = player -> "";
+        private Function<Player, List<String>> lines = player -> List.of();
+        private long interval = 20L;
+        private BiConsumer<Player, Scoreboard> onCreate = (player, scoreboard) -> {};
+        private Runnable preUpdate = () -> {};
+        private String skipMetadata = SKIP_BOARD_METADATA;
+
+        private Builder() {
+        }
+
+        public Builder title(Function<Player, String> title) {
+            this.title = Objects.requireNonNull(title, "title");
+            return this;
+        }
+
+        public Builder lines(Function<Player, List<String>> lines) {
+            this.lines = Objects.requireNonNull(lines, "lines");
+            return this;
+        }
+
+        public Builder interval(long interval) {
+            this.interval = interval;
+            return this;
+        }
+
+        public Builder onCreate(BiConsumer<Player, Scoreboard> onCreate) {
+            this.onCreate = Objects.requireNonNull(onCreate, "onCreate");
+            return this;
+        }
+
+        public Builder preUpdate(Runnable preUpdate) {
+            this.preUpdate = Objects.requireNonNull(preUpdate, "preUpdate");
+            return this;
+        }
+
+        public Builder skipMetadata(String skipMetadata) {
+            this.skipMetadata = Objects.requireNonNull(skipMetadata, "skipMetadata");
+            return this;
+        }
+
+        public BoardManager build() {
+            return new BoardManager(this);
+        }
     }
 }
