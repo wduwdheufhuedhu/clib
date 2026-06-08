@@ -31,7 +31,7 @@ public final class Board {
     private final Set<String> usedKeys = new HashSet<>();
     private final Scoreboard scoreboard;
     private final Objective objective;
-    private volatile String lastTitle;
+    private String lastTitle;
 
     Board(Player player, BoardManager manager) {
         var scoreboardManager = LibraryPlugin.getInstance().getPlugin().getServer().getScoreboardManager();

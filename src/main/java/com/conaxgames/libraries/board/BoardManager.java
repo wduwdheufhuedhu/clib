@@ -2,35 +2,29 @@ package com.conaxgames.libraries.board;
 
 import com.conaxgames.libraries.LibraryPlugin;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public final class BoardManager implements Runnable {
 
     public static final String SKIP_BOARD_METADATA = "cElement";
 
-    private final Map<UUID, Board> boards = new ConcurrentHashMap<>();
+    private final Map<UUID, Board> boards = new HashMap<>();
 
     private final Function<Player, String> title;
     private final Function<Player, List<String>> lines;
     private final long interval;
-    private final BiConsumer<Player, Scoreboard> onCreate;
-    private final Runnable preUpdate;
     private final String skipMetadata;
 
     private BoardManager(Builder builder) {
         this.title = builder.title;
         this.lines = builder.lines;
         this.interval = builder.interval;
-        this.onCreate = builder.onCreate;
-        this.preUpdate = builder.preUpdate;
         this.skipMetadata = builder.skipMetadata;
     }
 
@@ -48,7 +42,6 @@ public final class BoardManager implements Runnable {
 
     @Override
     public void run() {
-        preUpdate.run();
         var server = LibraryPlugin.getInstance().getPlugin().getServer();
         var logger = LibraryPlugin.getInstance().getPlugin().getLogger();
 
@@ -93,7 +86,6 @@ public final class BoardManager implements Runnable {
         var sb = board.scoreboard();
         if (!player.getScoreboard().equals(sb)) {
             player.setScoreboard(sb);
-            onCreate.accept(player, sb);
         }
     }
 
@@ -116,8 +108,6 @@ public final class BoardManager implements Runnable {
         private Function<Player, String> title = player -> "";
         private Function<Player, List<String>> lines = player -> List.of();
         private long interval = 20L;
-        private BiConsumer<Player, Scoreboard> onCreate = (player, scoreboard) -> {};
-        private Runnable preUpdate = () -> {};
         private String skipMetadata = SKIP_BOARD_METADATA;
 
         private Builder() {
@@ -135,16 +125,6 @@ public final class BoardManager implements Runnable {
 
         public Builder interval(long interval) {
             this.interval = interval;
-            return this;
-        }
-
-        public Builder onCreate(BiConsumer<Player, Scoreboard> onCreate) {
-            this.onCreate = Objects.requireNonNull(onCreate, "onCreate");
-            return this;
-        }
-
-        public Builder preUpdate(Runnable preUpdate) {
-            this.preUpdate = Objects.requireNonNull(preUpdate, "preUpdate");
             return this;
         }
 
