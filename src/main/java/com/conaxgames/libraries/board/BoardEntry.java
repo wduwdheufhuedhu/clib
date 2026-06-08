@@ -68,9 +68,20 @@ final class BoardEntry {
             return splitCache = new String[]{translated, ""};
         }
 
-        int splitAt = CC.safeSplitIndex(translated, unit);
-        var prefix = translated.substring(0, splitAt);
-        var suffix = CC.getLastColors(prefix) + translated.substring(splitAt);
-        return splitCache = new String[]{prefix, suffix};
+        var prefix = translated.substring(0, unit);
+        int lastColor = prefix.lastIndexOf('\u00a7');
+        if (lastColor >= unit - 2) {
+            var trimmed = prefix.substring(0, lastColor);
+            int end = Math.min(translated.length(), unit + 1);
+            return splitCache = new String[]{
+                    trimmed,
+                    CC.getLastColors(translated.substring(0, end)) + translated.substring(lastColor + 2)
+            };
+        }
+
+        return splitCache = new String[]{
+                prefix,
+                CC.getLastColors(prefix) + translated.substring(unit)
+        };
     }
 }
