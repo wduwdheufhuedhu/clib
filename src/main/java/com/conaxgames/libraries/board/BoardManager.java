@@ -61,7 +61,7 @@ public final class BoardManager implements Runnable {
 
     private void updateBoard(Player player, Board board) {
         var lines = Objects.requireNonNullElse(this.lines.apply(player), List.<String>of());
-        board.refreshTitle(board.clipTitle(title.apply(player)));
+        board.updateTitle(title.apply(player));
 
         var entries = board.entries();
         while (entries.size() > lines.size()) {
@@ -76,7 +76,7 @@ public final class BoardManager implements Runnable {
                 entry = entries.get(i);
                 entry.text(line);
             } else {
-                entry = new BoardEntry(board, line);
+                entry = new BoardEntry(board, i, line);
                 entries.add(entry);
             }
             entry.send(i + 1);

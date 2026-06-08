@@ -16,17 +16,17 @@ final class BoardEntry {
     private String text;
     private String[] splitCache;
 
-    BoardEntry(Board board, String text) {
+    BoardEntry(Board board, int index, String text) {
         this.board = board;
         this.text = text != null ? text : "";
-        this.key = board.allocateKey();
+        this.key = Board.entryKey(index);
         this.team = board.scoreboard().registerNewTeam("board_" + TEAM_COUNTER.getAndIncrement());
         team.addEntry(key);
     }
 
     void send(int position) {
         var split = split();
-        int max = Board.segmentMax();
+        int max = Board.SEGMENT_MAX;
         var prefix = split[0].length() <= max ? split[0] : split[0].substring(0, max);
         var suffix = split[1].length() <= max ? split[1] : split[1].substring(0, max);
 
@@ -44,7 +44,6 @@ final class BoardEntry {
     }
 
     void remove() {
-        board.releaseKey(key);
         board.scoreboard().resetScores(key);
         team.removeEntry(key);
         team.unregister();
@@ -62,7 +61,7 @@ final class BoardEntry {
             return splitCache;
         }
         var translated = CC.translate(text);
-        int unit = Board.segmentMax();
+        int unit = Board.SEGMENT_MAX;
 
         if (translated.length() <= unit) {
             return splitCache = new String[]{translated, ""};
