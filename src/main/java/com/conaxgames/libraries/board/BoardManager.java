@@ -100,7 +100,9 @@ public final class BoardManager implements Runnable {
         if (player.hasMetadata(skipMetadata)) {
             return;
         }
-        boards.remove(player.getUniqueId());
+        if (boards.remove(player.getUniqueId()) != null && player.isOnline()) {
+            player.setScoreboard(player.getServer().getScoreboardManager().getMainScoreboard());
+        }
     }
 
     public static final class Builder {
