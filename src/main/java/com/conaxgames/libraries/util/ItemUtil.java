@@ -48,8 +48,8 @@ public final class ItemUtil {
         }
 
         meta.setLore(Arrays.asList(
-                "", CC.GRAY + formatName(type.getEffectType().getKey().getKey()) + " " + level + " Potion",
-                CC.GRAY + "    Duration: " + TimeUtil.millisToRoundedTime(duration * 1000L)));
+                "", CC.translate("&7" + formatName(type.getEffectType().getKey().getKey()) + " " + level + " Potion"),
+                CC.translate("&7    Duration: " + TimeUtil.millisToRoundedTime(duration * 1000L))));
 
         meta.addCustomEffect(new PotionEffect(type.getEffectType(), duration * 20, level - 1), false);
         itemStack.setItemMeta(meta);

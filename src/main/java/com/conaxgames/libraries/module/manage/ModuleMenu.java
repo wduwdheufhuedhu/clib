@@ -49,17 +49,17 @@ public class ModuleMenu extends PaginatedMenu {
         Button infoButton = new Button() {
             @Override
             public String getName(Player player) {
-                return CC.GOLD + "Module Statistics";
+                return CC.translate("&6Module Statistics");
             }
 
             @Override
             public List<String> getDescription(Player player) {
                 List<String> lore = new ArrayList<>();
-                lore.add(CC.DARK_GRAY + "Module overview");
+                lore.add(CC.translate("&8Module overview"));
                 lore.add(" ");
-                lore.add(CC.GRAY + "Total Modules: " + CC.WHITE + total);
-                lore.add(CC.GRAY + "Enabled: " + CC.GREEN + enabled);
-                lore.add(CC.GRAY + "Disabled: " + CC.RED + (total - enabled));
+                lore.add(CC.translate("&7Total Modules: &f" + total));
+                lore.add(CC.translate("&7Enabled: &a" + enabled));
+                lore.add(CC.translate("&7Disabled: &c" + (total - enabled)));
                 lore.add(" ");
                 return lore;
             }

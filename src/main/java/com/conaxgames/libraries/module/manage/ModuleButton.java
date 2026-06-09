@@ -27,25 +27,25 @@ public class ModuleButton extends Button {
 
     @Override
     public String getName(Player player) {
-        return (enabled ? CC.GREEN : CC.RED) + module.getName();
+        return CC.translate((enabled ? "&a" : "&c") + module.getName());
     }
 
     @Override
     public List<String> getDescription(Player player) {
         List<String> description = new ArrayList<>();
-        description.add(CC.DARK_GRAY + module.getJavaPlugin().getName());
+        description.add(CC.translate("&8" + module.getJavaPlugin().getName()));
         description.add(" ");
-        description.addAll(FormatUtil.wordWrap(CC.GRAY + module.getDescription()));
+        description.addAll(FormatUtil.wordWrap(CC.translate("&7" + module.getDescription())));
         description.add(" ");
-        description.add(CC.GRAY + "Author: " + CC.WHITE + module.getAuthor());
+        description.add(CC.translate("&7Author: &f" + module.getAuthor()));
 
         if (module.getRequiredPlugin() != null) {
-            description.add(CC.GRAY + "Requires: " + CC.WHITE + module.getRequiredPlugin());
+            description.add(CC.translate("&7Requires: &f" + module.getRequiredPlugin()));
         }
 
         description.add(" ");
-        description.add(CC.YELLOW + (enabled ? "Click to disable." : "Click to enable."));
-        description.addAll(FormatUtil.wordWrap(CC.GRAY + "(Use a Shift-Click to not save this change over reboots)"));
+        description.add(CC.translate("&e" + (enabled ? "Click to disable." : "Click to enable.")));
+        description.addAll(FormatUtil.wordWrap(CC.translate("&7(Use a Shift-Click to not save this change over reboots)")));
 
         return description;
     }
@@ -61,6 +61,6 @@ public class ModuleButton extends Button {
         String result = enabled
                 ? moduleManager.disableModule(module, persistent)
                 : moduleManager.enableModule(module, persistent);
-        player.sendMessage(CC.PRIMARY + result + CC.GRAY + " (saved: " + persistent + ")");
+        player.sendMessage(CC.translate("&e" + result + "&7 (saved: " + persistent + ")"));
     }
 }

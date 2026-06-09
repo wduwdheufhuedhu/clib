@@ -38,19 +38,19 @@ public final class IntegerTraitButton<T> extends Button {
 
     @Override
     public String getName(Player player) {
-        return CC.SECONDARY + "Edit " + trait;
+        return CC.translate("&6Edit " + trait);
     }
 
     @Override
     public List<String> getDescription(Player player) {
-        List<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + description));
+        List<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.translate("&7" + description)));
         lore.add(" ");
-        lore.add(CC.GRAY + "Current: " + CC.WHITE + readFunction.apply(target));
+        lore.add(CC.translate("&7Current: &f" + readFunction.apply(target)));
         lore.add(" ");
-        lore.add(CC.YELLOW + "Left-click to increase by 1!");
-        lore.add(CC.YELLOW + "Right-click to decrease by 1!");
+        lore.add(CC.translate("&eLeft-click to increase by 1!"));
+        lore.add(CC.translate("&eRight-click to decrease by 1!"));
         lore.add(" ");
-        lore.addAll(FormatUtil.wordWrap(CC.DARK_GRAY + "Holding shift will increase or decrease by 10."));
+        lore.addAll(FormatUtil.wordWrap(CC.translate("&8Holding shift will increase or decrease by 10.")));
         return lore;
     }
 
@@ -74,6 +74,6 @@ public final class IntegerTraitButton<T> extends Button {
         int updated = current + change;
         writeFunction.accept(target, updated);
         saveFunction.accept(target);
-        player.sendMessage(CC.GREEN + "Set " + trait + " to " + updated + ".");
+        player.sendMessage(CC.translate("&aSet " + trait + " to " + updated + "."));
     }
 }

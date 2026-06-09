@@ -3,13 +3,13 @@ package com.conaxgames.libraries.menu;
 import com.conaxgames.libraries.LibraryPlugin;
 import com.conaxgames.libraries.event.impl.menu.MenuOpenEvent;
 import com.conaxgames.libraries.menu.listener.ButtonListener;
-import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.scheduler.Scheduler;
 import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.inventory.XInventoryView;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -116,7 +116,7 @@ public abstract class Menu {
             }
         }
         if (this.placeholder) {
-            Button filler = Button.placeholder(XMaterial.GRAY_STAINED_GLASS_PANE.get(), (byte) 7, CC.DARK_GRAY);
+            Button filler = Button.placeholder(XMaterial.GRAY_STAINED_GLASS_PANE.get(), (byte) 7, ChatColor.DARK_GRAY.toString());
             for (int slot = 0; slot < invSize; slot++) {
                 layout.putIfAbsent(slot, filler);
             }

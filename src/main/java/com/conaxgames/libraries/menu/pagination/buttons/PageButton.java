@@ -49,7 +49,7 @@ public class PageButton extends Button {
 
     @Override
     public String getName(Player player) {
-        return this.mod > 0 ? CC.GREEN + "Next Page" : CC.RED + "Previous Page";
+        return CC.translate(this.mod > 0 ? "&aNext Page" : "&cPrevious Page");
     }
 
     @Override

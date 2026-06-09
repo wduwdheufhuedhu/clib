@@ -38,17 +38,17 @@ public final class BooleanTraitButton<T> extends Button {
 
     @Override
     public String getName(Player player) {
-        return CC.GOLD + "Edit " + trait;
+        return CC.translate("&6Edit " + trait);
     }
 
     @Override
     public List<String> getDescription(Player player) {
         boolean enabled = readFunction.apply(target);
-        List<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + description, 24));
+        List<String> lore = new ArrayList<>(FormatUtil.wordWrap(CC.translate("&7" + description), 24));
         lore.add(" ");
-        lore.add(CC.GRAY + "Current: " + CC.WHITE + (enabled ? "Enabled" : "Disabled"));
+        lore.add(CC.translate("&7Current: &f" + (enabled ? "Enabled" : "Disabled")));
         lore.add(" ");
-        lore.add(CC.YELLOW + "Click to " + (enabled ? "disable" : "enable") + "!");
+        lore.add(CC.translate("&eClick to " + (enabled ? "disable" : "enable") + "!"));
         return lore;
     }
 
@@ -68,6 +68,6 @@ public final class BooleanTraitButton<T> extends Button {
         writeFunction.accept(target, !current);
         saveFunction.accept(target);
         playNeutral(player);
-        player.sendMessage(CC.GREEN + "Set " + trait + " to " + (current ? "off" : "on") + ".");
+        player.sendMessage(CC.translate("&aSet " + trait + " to " + (current ? "off" : "on") + "."));
     }
 }

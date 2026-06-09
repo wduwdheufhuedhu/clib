@@ -27,8 +27,8 @@ public class JumpToPageButton extends Button {
 
     @Override
     public String getName(Player player) {
-        String prefix = this.glowing ? CC.GOLD + "► " : CC.SECONDARY;
-        return prefix + "Page " + this.page;
+        String prefix = this.glowing ? "&6► " : "&6";
+        return CC.translate(prefix + "Page " + this.page);
     }
 
     @Override
@@ -39,15 +39,15 @@ public class JumpToPageButton extends Button {
         int totalPages = this.menu.getPages(player);
 
         if (this.page == currentPage) {
-            description.add(CC.GRAY + "This is your current page");
+            description.add(CC.translate("&7This is your current page"));
         } else {
-            description.add(CC.GRAY + "Current Page: " + currentPage);
-            description.add(CC.GRAY + "Total Pages: " + totalPages);
-            description.add(CC.GRAY + "Target Page: " + this.page);
+            description.add(CC.translate("&7Current Page: " + currentPage));
+            description.add(CC.translate("&7Total Pages: " + totalPages));
+            description.add(CC.translate("&7Target Page: " + this.page));
         }
 
         description.add(" ");
-        description.add(CC.YELLOW + "Click to jump to this page!");
+        description.add(CC.translate("&eClick to jump to this page!"));
 
         return description;
     }

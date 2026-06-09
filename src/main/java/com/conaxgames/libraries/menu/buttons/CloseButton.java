@@ -13,7 +13,7 @@ public class CloseButton extends Button {
 
     @Override
     public String getName(Player player) {
-        return CC.RED + "Close";
+        return CC.translate("&cClose");
     }
 
     @Override

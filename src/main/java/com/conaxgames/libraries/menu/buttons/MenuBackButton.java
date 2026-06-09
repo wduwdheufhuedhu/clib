@@ -23,12 +23,12 @@ public final class MenuBackButton extends Button {
 
     @Override
     public String getName(Player player) {
-        return CC.GREEN + "Back";
+        return CC.translate("&aBack");
     }
 
     @Override
     public List<String> getDescription(Player player) {
-        return new ArrayList<>(FormatUtil.wordWrap(CC.GRAY + "Click here to return to the previous menu.", 24));
+        return new ArrayList<>(FormatUtil.wordWrap(CC.translate("&7Click here to return to the previous menu."), 24));
     }
 
     @Override

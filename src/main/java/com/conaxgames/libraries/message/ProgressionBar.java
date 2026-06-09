@@ -1,15 +1,17 @@
 package com.conaxgames.libraries.message;
 
+import org.bukkit.ChatColor;
+
 public final class ProgressionBar {
 
     private ProgressionBar() {}
 
     public static String construct(int current, int max) {
-        return construct(current, max, 20, '-', CC.GREEN, CC.GRAY);
+        return construct(current, max, 20, '-', ChatColor.GREEN.toString(), ChatColor.GRAY.toString());
     }
 
     public static String construct(int current, int max, int totalBars) {
-        return construct(current, max, totalBars, '-', CC.GREEN, CC.GRAY);
+        return construct(current, max, totalBars, '-', ChatColor.GREEN.toString(), ChatColor.GRAY.toString());
     }
 
     public static String construct(int current, int max, int totalBars,

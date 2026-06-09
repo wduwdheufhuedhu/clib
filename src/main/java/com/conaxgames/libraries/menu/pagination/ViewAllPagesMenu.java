@@ -22,7 +22,7 @@ public class ViewAllPagesMenu extends Menu {
 
     @Override
     public String getTitle(Player player) {
-        return CC.GREEN + "View All Pages - " + this.menu.getPrePaginatedTitle(player);
+        return CC.translate("&aView All Pages - " + this.menu.getPrePaginatedTitle(player));
     }
 
     @Override

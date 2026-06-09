@@ -19,7 +19,7 @@ public class BackButton extends Button {
 
     @Override
     public String getName(Player player) {
-        return CC.RED + "Back";
+        return CC.translate("&cBack");
     }
 
     @Override

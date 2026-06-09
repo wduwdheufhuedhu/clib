@@ -4,6 +4,7 @@ import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.message.FormatUtil;
 import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.ColorMaterialUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -32,7 +33,7 @@ public class BooleanButton extends Button {
 
     @Override
     public String getName(Player player) {
-        return this.confirm ? CC.GREEN + "Confirm" : CC.RED + "Cancel";
+        return CC.translate(this.confirm ? "&aConfirm" : "&cCancel");
     }
 
     @Override
@@ -40,9 +41,9 @@ public class BooleanButton extends Button {
         List<String> description = new ArrayList<>();
 
         if (this.confirm) {
-            description.addAll(FormatUtil.wordWrap(CC.GRAY + details));
+            description.addAll(FormatUtil.wordWrap(CC.translate("&7" + details)));
         } else {
-            description.add(CC.GRAY + "Cancel this action.");
+            description.add(CC.translate("&7Cancel this action."));
         }
 
         return description;
@@ -55,6 +56,6 @@ public class BooleanButton extends Button {
 
     @Override
     public Material getMaterial(Player player) {
-        return ColorMaterialUtil.convertCCToXClay(this.confirm ? CC.GREEN : CC.RED).get();
+        return ColorMaterialUtil.convertCCToXClay(this.confirm ? ChatColor.GREEN.toString() : ChatColor.RED.toString()).get();
     }
 }

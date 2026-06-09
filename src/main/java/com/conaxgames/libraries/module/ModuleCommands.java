@@ -33,14 +33,14 @@ public class ModuleCommands extends BaseCommand {
     @Description("Enable individual modules")
     @CommandCompletion("@modules")
     public void onEnable(CommandSender sender, Module module, boolean persistent) {
-        sender.sendMessage(CC.PRIMARY + moduleManager.enableModule(module, persistent));
+        sender.sendMessage(CC.translate("&e" + moduleManager.enableModule(module, persistent)));
     }
 
     @Subcommand("disable")
     @Description("Disable individual modules")
     @CommandCompletion("@modules")
     public void onDisable(CommandSender sender, Module module, boolean persistent) {
-        sender.sendMessage(CC.PRIMARY + moduleManager.disableModule(module, persistent));
+        sender.sendMessage(CC.translate("&e" + moduleManager.disableModule(module, persistent)));
     }
 
     @Default
