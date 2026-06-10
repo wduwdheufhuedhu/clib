@@ -31,8 +31,8 @@ public final class PaginatedMenu {
         private Function<Player, List<Button>> entries = player -> Collections.emptyList();
         private int previousSlot = 48;
         private int nextSlot = 50;
-        private Button previousButton;
-        private Button nextButton;
+        private ItemStack previousIcon;
+        private ItemStack nextIcon;
         private Button filler;
         private long updateTicks = 0L;
 
@@ -75,13 +75,13 @@ public final class PaginatedMenu {
             return this;
         }
 
-        public Builder previousButton(Button previousButton) {
-            this.previousButton = previousButton;
+        public Builder previousIcon(ItemStack previousIcon) {
+            this.previousIcon = previousIcon;
             return this;
         }
 
-        public Builder nextButton(Button nextButton) {
-            this.nextButton = nextButton;
+        public Builder nextIcon(ItemStack nextIcon) {
+            this.nextIcon = nextIcon;
             return this;
         }
 
@@ -109,9 +109,9 @@ public final class PaginatedMenu {
         public Menu build() {
             int[] slots = contentSlots != null ? contentSlots : defaultSlots(maxPerPage);
             int perPage = slots.length;
-            ItemStack previousIcon = previousButton != null ? previousButton.icon()
+            ItemStack previous = previousIcon != null ? previousIcon
                     : Button.builder(XMaterial.RED_DYE).name("&cPrevious Page").build().icon();
-            ItemStack nextIcon = nextButton != null ? nextButton.icon()
+            ItemStack next = nextIcon != null ? nextIcon
                     : Button.builder(XMaterial.GREEN_DYE).name("&aNext Page").build().icon();
 
             Menu[] self = new Menu[1];
@@ -145,13 +145,13 @@ public final class PaginatedMenu {
                 }
 
                 if (page[0] > 0) {
-                    layout.set(previousSlot, arrow(previousIcon, () -> {
+                    layout.set(previousSlot, arrow(previous, () -> {
                         page[0]--;
                         self[0].open(player);
                     }));
                 }
                 if (page[0] < total - 1) {
-                    layout.set(nextSlot, arrow(nextIcon, () -> {
+                    layout.set(nextSlot, arrow(next, () -> {
                         page[0]++;
                         self[0].open(player);
                     }));
