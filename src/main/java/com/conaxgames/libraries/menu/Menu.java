@@ -20,8 +20,6 @@ public final class Menu {
 
     public static final Map<UUID, Menu> currentlyOpenedMenus = new ConcurrentHashMap<>();
     private static final Map<UUID, Scheduler.CancellableTask> CHECK_TASKS = new ConcurrentHashMap<>();
-    private static final long UPDATE_DELAY_TICKS = 10L;
-    private static final long UPDATE_PERIOD_TICKS = 20L;
 
     static {
         Bukkit.getServer().getPluginManager().registerEvents(new ButtonListener(), LibraryPlugin.getInstance().getPlugin());
@@ -38,6 +36,7 @@ public final class Menu {
     private final Renderer renderer;
     private final Button filler;
     private final boolean autoUpdate;
+    private final long updateTicks;
     private final boolean updateAfterClick;
     private final boolean refreshInPlace;
     private final Consumer<Player> onOpen;
@@ -51,6 +50,7 @@ public final class Menu {
         this.renderer = builder.renderer;
         this.filler = builder.filler;
         this.autoUpdate = builder.autoUpdate;
+        this.updateTicks = builder.updateTicks;
         this.updateAfterClick = builder.updateAfterClick;
         this.refreshInPlace = builder.refreshInPlace;
         this.onOpen = builder.onOpen;
@@ -206,8 +206,8 @@ public final class Menu {
                     }
                     update(player);
                 },
-                UPDATE_DELAY_TICKS,
-                UPDATE_PERIOD_TICKS
+                updateTicks,
+                updateTicks
         );
         CHECK_TASKS.put(id, task);
     }
@@ -240,6 +240,7 @@ public final class Menu {
         private Renderer renderer;
         private Button filler;
         private boolean autoUpdate = false;
+        private long updateTicks = 20L;
         private boolean updateAfterClick = true;
         private boolean refreshInPlace = true;
         private Consumer<Player> onOpen;
@@ -277,11 +278,12 @@ public final class Menu {
         }
 
         public Builder autoUpdate() {
-            return autoUpdate(true);
+            return autoUpdate(20L);
         }
 
-        public Builder autoUpdate(boolean autoUpdate) {
-            this.autoUpdate = autoUpdate;
+        public Builder autoUpdate(long updateTicks) {
+            this.autoUpdate = true;
+            this.updateTicks = updateTicks;
             return this;
         }
 
