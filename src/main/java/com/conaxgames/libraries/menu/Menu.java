@@ -8,6 +8,7 @@ import com.cryptomorin.xseries.inventory.XInventoryView;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,9 +108,9 @@ public final class Menu {
 
         Inventory top = XInventoryView.of(player.getOpenInventory()).getTopInventory();
         if (refreshInPlace
-                && top.getHolder() instanceof MenuInventoryHolder existing
-                && existing.getMenu() == this
-                && existing.getViewerId().equals(id)
+                && top.getHolder() instanceof Holder existing
+                && existing.menu == this
+                && existing.viewerId.equals(id)
                 && top.getSize() == size) {
             fill(existing, layout, size);
             beginSession(player);
@@ -117,9 +118,9 @@ public final class Menu {
         }
 
         cancelCheck(player);
-        MenuInventoryHolder holder = new MenuInventoryHolder(this, id);
+        Holder holder = new Holder(this, id);
         Inventory inv = Bukkit.createInventory(holder, size, title.apply(player));
-        holder.attachInventory(inv);
+        holder.inventory = inv;
         fill(holder, layout, size);
         player.openInventory(inv);
         beginSession(player);
@@ -127,10 +128,10 @@ public final class Menu {
 
     public void update(Player player) {
         Inventory top = XInventoryView.of(player.getOpenInventory()).getTopInventory();
-        if (!(top.getHolder() instanceof MenuInventoryHolder holder)) {
+        if (!(top.getHolder() instanceof Holder holder)) {
             return;
         }
-        if (holder.getMenu() != this || !holder.getViewerId().equals(player.getUniqueId())) {
+        if (holder.menu != this || !holder.viewerId.equals(player.getUniqueId())) {
             return;
         }
         Map<Integer, Button> layout = render(player);
@@ -177,9 +178,9 @@ public final class Menu {
         }
     }
 
-    private void fill(MenuInventoryHolder holder, Map<Integer, Button> layout, int size) {
-        holder.setSlotButtons(layout);
-        Inventory inv = holder.getInventory();
+    private void fill(Holder holder, Map<Integer, Button> layout, int size) {
+        holder.slotButtons = layout;
+        Inventory inv = holder.inventory;
         for (int slot = 0; slot < size; slot++) {
             Button button = layout.get(slot);
             inv.setItem(slot, button != null ? button.icon() : null);
@@ -210,6 +211,28 @@ public final class Menu {
                 updateTicks
         );
         CHECK_TASKS.put(id, task);
+    }
+
+    public static final class Holder implements InventoryHolder {
+
+        public final Menu menu;
+        public final UUID viewerId;
+        private Map<Integer, Button> slotButtons = Map.of();
+        Inventory inventory;
+
+        Holder(Menu menu, UUID viewerId) {
+            this.menu = menu;
+            this.viewerId = viewerId;
+        }
+
+        public Button button(int slot) {
+            return slotButtons.get(slot);
+        }
+
+        @Override
+        public Inventory getInventory() {
+            return inventory;
+        }
     }
 
     public static final class Layout {
