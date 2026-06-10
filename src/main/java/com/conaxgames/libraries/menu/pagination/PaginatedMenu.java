@@ -35,6 +35,7 @@ public final class PaginatedMenu {
         private ItemStack nextIcon;
         private Button filler;
         private long updateTicks = 0L;
+        private Menu previousMenu;
 
         private Builder(String title) {
             this.title = title;
@@ -97,6 +98,11 @@ public final class PaginatedMenu {
             return this;
         }
 
+        public Builder previous(Menu previousMenu) {
+            this.previousMenu = previousMenu;
+            return this;
+        }
+
         public Builder autoUpdate() {
             return autoUpdate(20L);
         }
@@ -126,6 +132,9 @@ public final class PaginatedMenu {
             Menu.Builder builder = Menu.builder(titleFunction)
                     .rows(rows)
                     .refreshInPlace(false);
+            if (previousMenu != null) {
+                builder.previous(previousMenu);
+            }
             if (updateTicks > 0L) {
                 builder.autoUpdate(updateTicks);
             }
