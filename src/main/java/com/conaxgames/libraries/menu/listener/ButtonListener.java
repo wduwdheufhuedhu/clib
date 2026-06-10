@@ -26,11 +26,7 @@ public final class ButtonListener implements Listener {
         if (!(top.getHolder() instanceof MenuInventoryHolder holder) || !holder.getViewerId().equals(player.getUniqueId())) {
             return;
         }
-        Menu menu = holder.getMenu();
-
-        if (menu.cancelClicks()) {
-            event.setCancelled(true);
-        }
+        event.setCancelled(true);
 
         if (event.getRawSlot() != event.getSlot()) {
             return;
@@ -41,23 +37,16 @@ public final class ButtonListener implements Listener {
             return;
         }
 
-        if (!button.cancel()) {
-            event.setCancelled(false);
-        }
-
+        Menu menu = holder.getMenu();
         button.click(player, event.getClick());
-
         if (Menu.opened(player) == menu && menu.updateAfterClick()) {
             menu.update(player);
         }
-
-        if (event.isCancelled()) {
-            LibraryPlugin.getInstance().getScheduler().runTaskLater(
-                    LibraryPlugin.getInstance().getPlugin(),
-                    player::updateInventory,
-                    1L
-            );
-        }
+        LibraryPlugin.getInstance().getScheduler().runTaskLater(
+                LibraryPlugin.getInstance().getPlugin(),
+                player::updateInventory,
+                1L
+        );
     }
 
     @EventHandler

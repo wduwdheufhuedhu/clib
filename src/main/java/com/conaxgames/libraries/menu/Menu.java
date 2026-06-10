@@ -39,7 +39,6 @@ public final class Menu {
     private final Button filler;
     private final boolean autoUpdate;
     private final boolean updateAfterClick;
-    private final boolean cancelClicks;
     private final boolean refreshInPlace;
     private final Consumer<Player> onOpen;
     private final Consumer<Player> onClose;
@@ -53,7 +52,6 @@ public final class Menu {
         this.filler = builder.filler;
         this.autoUpdate = builder.autoUpdate;
         this.updateAfterClick = builder.updateAfterClick;
-        this.cancelClicks = builder.cancelClicks;
         this.refreshInPlace = builder.refreshInPlace;
         this.onOpen = builder.onOpen;
         this.onClose = builder.onClose;
@@ -81,10 +79,6 @@ public final class Menu {
 
     public Menu previous() {
         return previous;
-    }
-
-    boolean cancelClicks() {
-        return cancelClicks;
     }
 
     boolean updateAfterClick() {
@@ -247,7 +241,6 @@ public final class Menu {
         private Button filler;
         private boolean autoUpdate = false;
         private boolean updateAfterClick = true;
-        private boolean cancelClicks = true;
         private boolean refreshInPlace = true;
         private Consumer<Player> onOpen;
         private Consumer<Player> onClose;
@@ -294,11 +287,6 @@ public final class Menu {
 
         public Builder updateAfterClick(boolean updateAfterClick) {
             this.updateAfterClick = updateAfterClick;
-            return this;
-        }
-
-        public Builder cancelClicks(boolean cancelClicks) {
-            this.cancelClicks = cancelClicks;
             return this;
         }
 

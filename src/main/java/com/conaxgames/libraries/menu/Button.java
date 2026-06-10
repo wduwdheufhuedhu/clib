@@ -20,16 +20,14 @@ public final class Button {
 
     private final ItemStack icon;
     private final Click click;
-    private final boolean cancel;
 
-    private Button(ItemStack icon, Click click, boolean cancel) {
+    private Button(ItemStack icon, Click click) {
         this.icon = icon;
         this.click = click;
-        this.cancel = cancel;
     }
 
     public static Button of(ItemStack icon) {
-        return new Button(icon, null, true);
+        return new Button(icon, null);
     }
 
     public static Builder builder(XMaterial material) {
@@ -44,10 +42,6 @@ public final class Button {
         return icon;
     }
 
-    public boolean cancel() {
-        return cancel;
-    }
-
     public void click(Player player, ClickType type) {
         if (click != null) {
             click.on(player, type);
@@ -58,7 +52,6 @@ public final class Button {
 
         private final ItemBuilderUtil item;
         private Click click;
-        private boolean cancel = true;
 
         private Builder(ItemBuilderUtil item) {
             this.item = item;
@@ -123,18 +116,13 @@ public final class Button {
             return this;
         }
 
-        public Builder cancel(boolean cancel) {
-            this.cancel = cancel;
-            return this;
-        }
-
         public Builder onClick(Click click) {
             this.click = click;
             return this;
         }
 
         public Button build() {
-            return new Button(item.toItemStack(), click, cancel);
+            return new Button(item.toItemStack(), click);
         }
     }
 }
