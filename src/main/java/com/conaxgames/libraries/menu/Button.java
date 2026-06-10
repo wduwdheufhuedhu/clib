@@ -20,14 +20,24 @@ public final class Button {
 
     private final ItemStack icon;
     private final Click click;
+    private final boolean editable;
 
     private Button(ItemStack icon, Click click) {
+        this(icon, click, false);
+    }
+
+    private Button(ItemStack icon, Click click, boolean editable) {
         this.icon = icon;
         this.click = click;
+        this.editable = editable;
     }
 
     public static Button of(ItemStack icon) {
         return new Button(icon, null);
+    }
+
+    public static Button editable(ItemStack initial) {
+        return new Button(initial, null, true);
     }
 
     public static Builder builder(XMaterial material) {
@@ -40,6 +50,10 @@ public final class Button {
 
     public ItemStack icon() {
         return icon;
+    }
+
+    public boolean editable() {
+        return editable;
     }
 
     public void click(Player player, ClickType type) {

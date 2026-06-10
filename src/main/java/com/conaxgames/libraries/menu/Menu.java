@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +119,14 @@ public final class Menu {
         return previous;
     }
 
+    public Inventory inventory(Player player) {
+        Inventory top = XInventoryView.of(player.getOpenInventory()).getTopInventory();
+        if (!(top.getHolder() instanceof Holder holder) || holder.menu != this || !holder.viewerId.equals(player.getUniqueId())) {
+            return null;
+        }
+        return top;
+    }
+
     public boolean updateAfterClick() {
         return updateAfterClick;
     }
@@ -162,9 +171,20 @@ public final class Menu {
     }
 
     private void fill(Holder holder, Map<Integer, Button> layout, int size) {
+        boolean seeded = holder.filled;
         holder.slotButtons = layout;
+        holder.hasEditable = false;
+        holder.filled = true;
         for (int slot = 0; slot < size; slot++) {
             Button button = layout.get(slot);
+            if (button != null && button.editable()) {
+                holder.hasEditable = true;
+                // Only seed the initial stack once; player-placed items survive refreshes.
+                if (!seeded) {
+                    holder.inventory.setItem(slot, button.icon());
+                }
+                continue;
+            }
             holder.inventory.setItem(slot, button != null ? button.icon() : null);
         }
     }
@@ -206,6 +226,8 @@ public final class Menu {
         public final Menu menu;
         public final UUID viewerId;
         private Map<Integer, Button> slotButtons = Map.of();
+        private boolean hasEditable;
+        private boolean filled;
         Inventory inventory;
 
         Holder(Menu menu, UUID viewerId) {
@@ -215,6 +237,15 @@ public final class Menu {
 
         public Button button(int slot) {
             return slotButtons.get(slot);
+        }
+
+        public boolean editable(int slot) {
+            Button button = slotButtons.get(slot);
+            return button != null && button.editable();
+        }
+
+        public boolean hasEditable() {
+            return hasEditable;
         }
 
         @Override
@@ -240,6 +271,15 @@ public final class Menu {
 
         public Layout set(int row, int col, Button button) {
             return set(row * 9 + col, button);
+        }
+
+        public Layout editable(int slot) {
+            return editable(slot, null);
+        }
+
+        public Layout editable(int slot, ItemStack initial) {
+            buttons.put(slot, Button.editable(initial));
+            return this;
         }
     }
 
@@ -275,6 +315,15 @@ public final class Menu {
 
         public Builder set(int row, int col, Button button) {
             return set(row * 9 + col, button);
+        }
+
+        public Builder editable(int slot) {
+            return editable(slot, null);
+        }
+
+        public Builder editable(int slot, ItemStack initial) {
+            buttons.put(slot, Button.editable(initial));
+            return this;
         }
 
         public Builder fill(Button filler) {

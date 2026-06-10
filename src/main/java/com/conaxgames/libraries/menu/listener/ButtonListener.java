@@ -8,8 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 
 public final class ButtonListener implements Listener {
@@ -23,10 +25,18 @@ public final class ButtonListener implements Listener {
         if (!(top.getHolder() instanceof Menu.Holder holder) || !holder.viewerId.equals(player.getUniqueId())) {
             return;
         }
-        event.setCancelled(true);
+        // Shift-clicks and double-click collects have ambiguous destinations
+        // and can move items across non-editable slots, so they stay blocked.
+        boolean ambiguous = event.getClick().isShiftClick() || event.getClick() == ClickType.DOUBLE_CLICK;
         if (event.getRawSlot() != event.getSlot()) {
+            event.setCancelled(!holder.hasEditable() || ambiguous);
             return;
         }
+        if (holder.editable(event.getSlot())) {
+            event.setCancelled(ambiguous);
+            return;
+        }
+        event.setCancelled(true);
         Button button = holder.button(event.getSlot());
         if (button == null) {
             return;
@@ -40,6 +50,23 @@ public final class ButtonListener implements Listener {
                 player::updateInventory,
                 1L
         );
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        Inventory top = XInventoryView.of(event.getView()).getTopInventory();
+        if (!(top.getHolder() instanceof Menu.Holder holder) || !holder.viewerId.equals(player.getUniqueId())) {
+            return;
+        }
+        for (int rawSlot : event.getRawSlots()) {
+            if (rawSlot < top.getSize() && !holder.editable(rawSlot)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
     }
 
     @EventHandler
