@@ -1,144 +1,207 @@
 package com.conaxgames.libraries.menu;
 
 import com.conaxgames.libraries.LibraryPlugin;
-import com.conaxgames.libraries.event.impl.menu.MenuOpenEvent;
 import com.conaxgames.libraries.menu.listener.ButtonListener;
+import com.conaxgames.libraries.message.CC;
 import com.conaxgames.libraries.util.scheduler.Scheduler;
-import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.inventory.XInventoryView;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-@Getter
-@Setter
-public abstract class Menu {
+public final class Menu {
 
     public static final Map<UUID, Menu> currentlyOpenedMenus = new ConcurrentHashMap<>();
-    public static final Map<UUID, Scheduler.CancellableTask> checkTasks = new ConcurrentHashMap<>();
-    private static final long MENU_UPDATE_DELAY_TICKS = 10L;
-    private static final long MENU_UPDATE_PERIOD_TICKS = 20L;
+    private static final Map<UUID, Scheduler.CancellableTask> CHECK_TASKS = new ConcurrentHashMap<>();
+    private static final long UPDATE_DELAY_TICKS = 10L;
+    private static final long UPDATE_PERIOD_TICKS = 20L;
 
     static {
         Bukkit.getServer().getPluginManager().registerEvents(new ButtonListener(), LibraryPlugin.getInstance().getPlugin());
     }
 
-    private boolean autoUpdate = false;
-    private boolean updateAfterClick = true;
-    private boolean placeholder = false;
-    private boolean noncancellingInventory = false;
-    private String staticTitle = null;
-    private Menu previous;
-
-    protected Menu() {
+    @FunctionalInterface
+    public interface Renderer {
+        void render(Player player, Layout layout);
     }
 
-    protected Menu(String staticTitle) {
-        this.staticTitle = Objects.requireNonNull(staticTitle, "staticTitle");
+    private final Function<Player, String> title;
+    private final int rows;
+    private final Map<Integer, Button> staticButtons;
+    private final Renderer renderer;
+    private final Button filler;
+    private final boolean autoUpdate;
+    private final boolean updateAfterClick;
+    private final boolean cancelClicks;
+    private final boolean refreshInPlace;
+    private final Consumer<Player> onOpen;
+    private final Consumer<Player> onClose;
+    private final Menu previous;
+
+    private Menu(Builder builder) {
+        this.title = builder.title;
+        this.rows = builder.rows;
+        this.staticButtons = builder.buttons;
+        this.renderer = builder.renderer;
+        this.filler = builder.filler;
+        this.autoUpdate = builder.autoUpdate;
+        this.updateAfterClick = builder.updateAfterClick;
+        this.cancelClicks = builder.cancelClicks;
+        this.refreshInPlace = builder.refreshInPlace;
+        this.onOpen = builder.onOpen;
+        this.onClose = builder.onClose;
+        this.previous = builder.previous;
     }
 
-    public static Menu getOpenMenu(Player player) {
+    public static Builder builder(String title) {
+        return new Builder(player -> CC.translate(title));
+    }
+
+    public static Builder builder(Function<Player, String> title) {
+        return new Builder(player -> CC.translate(title.apply(player)));
+    }
+
+    public static Menu opened(Player player) {
         return currentlyOpenedMenus.get(player.getUniqueId());
     }
 
-    public static void cancelCheck(Player player) {
-        Scheduler.CancellableTask task = checkTasks.remove(player.getUniqueId());
+    static void cancelCheck(Player player) {
+        Scheduler.CancellableTask task = CHECK_TASKS.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
         }
     }
 
-    public void openMenu(Player player) {
-        openMenu(player, true);
+    public Menu previous() {
+        return previous;
     }
 
-    public void openMenu(Player player, boolean firstOpen) {
-        if (firstOpen) {
-            MenuOpenEvent openEvent = new MenuOpenEvent(player, this);
-            if (openEvent.call()) {
-                return;
-            }
-        }
+    boolean cancelClicks() {
+        return cancelClicks;
+    }
 
+    boolean updateAfterClick() {
+        return updateAfterClick;
+    }
+
+    void closed(Player player) {
+        if (onClose != null) {
+            onClose.accept(player);
+        }
+    }
+
+    public void open(Player player) {
         if (Bukkit.isPrimaryThread()) {
-            open(player);
+            open0(player);
         } else {
-            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), () -> open(player));
+            LibraryPlugin.getInstance().getScheduler().runTask(LibraryPlugin.getInstance().getPlugin(), () -> open0(player));
         }
     }
 
-    private void open(Player player) {
+    private void open0(Player player) {
         UUID id = player.getUniqueId();
+        Map<Integer, Button> layout = render(player);
+        int size = resolveSize(layout);
+        applyFiller(layout, size);
+
         Inventory top = XInventoryView.of(player.getOpenInventory()).getTopInventory();
-
-        if (refreshInPlaceWhenPossible() && top.getHolder() instanceof MenuInventoryHolder existing) {
-            if (existing.getMenu() == this && existing.getViewerId().equals(id)) {
-                Map<Integer, Button> defined = getButtons(player);
-                int invSize = size(defined);
-                if (top.getSize() == invSize) {
-                    fillInventory(existing, player, defined, invSize);
-                    beginSession(player, top);
-                    return;
-                }
-            }
-        }
-
-        cancelCheck(player);
-        Map<Integer, Button> defined = getButtons(player);
-        int invSize = size(defined);
-        MenuInventoryHolder holder = new MenuInventoryHolder(this, id);
-        Inventory inv = Bukkit.createInventory(holder, invSize, getTitle(player));
-        holder.attachInventory(inv);
-        fillInventory(holder, player, defined, invSize);
-        player.openInventory(inv);
-        beginSession(player, inv);
-    }
-
-    protected boolean refreshInPlaceWhenPossible() {
-        return true;
-    }
-
-    private void fillInventory(MenuInventoryHolder holder, Player player, Map<Integer, Button> defined, int invSize) {
-        Map<Integer, Button> layout = new HashMap<>();
-        for (Map.Entry<Integer, Button> e : defined.entrySet()) {
-            int slot = e.getKey();
-            if (slot >= 0 && slot < invSize) {
-                layout.put(slot, e.getValue());
-            }
-        }
-        if (this.placeholder) {
-            Button filler = Button.placeholder(XMaterial.GRAY_STAINED_GLASS_PANE.get(), (byte) 7, ChatColor.DARK_GRAY.toString());
-            for (int slot = 0; slot < invSize; slot++) {
-                layout.putIfAbsent(slot, filler);
-            }
-        }
-        holder.setSlotButtons(layout);
-        Inventory inv = holder.getInventory();
-        for (int slot = 0; slot < invSize; slot++) {
-            Button b = layout.get(slot);
-            inv.setItem(slot, b != null ? b.getButtonItem(player) : null);
-        }
-    }
-
-    private void beginSession(Player player, Inventory inv) {
-        UUID id = player.getUniqueId();
-        cancelCheck(player);
-        currentlyOpenedMenus.put(id, this);
-        onOpen(player);
-
-        if (!this.autoUpdate) {
+        if (refreshInPlace
+                && top.getHolder() instanceof MenuInventoryHolder existing
+                && existing.getMenu() == this
+                && existing.getViewerId().equals(id)
+                && top.getSize() == size) {
+            fill(existing, layout, size);
+            beginSession(player);
             return;
         }
 
+        cancelCheck(player);
+        MenuInventoryHolder holder = new MenuInventoryHolder(this, id);
+        Inventory inv = Bukkit.createInventory(holder, size, title.apply(player));
+        holder.attachInventory(inv);
+        fill(holder, layout, size);
+        player.openInventory(inv);
+        beginSession(player);
+    }
+
+    public void update(Player player) {
+        Inventory top = XInventoryView.of(player.getOpenInventory()).getTopInventory();
+        if (!(top.getHolder() instanceof MenuInventoryHolder holder)) {
+            return;
+        }
+        if (holder.getMenu() != this || !holder.getViewerId().equals(player.getUniqueId())) {
+            return;
+        }
+        Map<Integer, Button> layout = render(player);
+        int size = resolveSize(layout);
+        applyFiller(layout, size);
+        if (top.getSize() != size) {
+            open(player);
+            return;
+        }
+        fill(holder, layout, size);
+    }
+
+    private Map<Integer, Button> render(Player player) {
+        Map<Integer, Button> layout = new HashMap<>(staticButtons);
+        if (renderer != null) {
+            renderer.render(player, new Layout(layout));
+        }
+        return layout;
+    }
+
+    private int resolveSize(Map<Integer, Button> layout) {
+        return rows > 0 ? rows * 9 : autoSize(layout);
+    }
+
+    private static int autoSize(Map<Integer, Button> layout) {
+        int highest = -1;
+        for (int slot : layout.keySet()) {
+            if (slot > highest) {
+                highest = slot;
+            }
+        }
+        if (highest < 0) {
+            return 9;
+        }
+        return Math.min(54, ((highest + 9) / 9) * 9);
+    }
+
+    private void applyFiller(Map<Integer, Button> layout, int size) {
+        if (filler == null) {
+            return;
+        }
+        for (int slot = 0; slot < size; slot++) {
+            layout.putIfAbsent(slot, filler);
+        }
+    }
+
+    private void fill(MenuInventoryHolder holder, Map<Integer, Button> layout, int size) {
+        holder.setSlotButtons(layout);
+        Inventory inv = holder.getInventory();
+        for (int slot = 0; slot < size; slot++) {
+            Button button = layout.get(slot);
+            inv.setItem(slot, button != null ? button.icon() : null);
+        }
+    }
+
+    private void beginSession(Player player) {
+        UUID id = player.getUniqueId();
+        cancelCheck(player);
+        currentlyOpenedMenus.put(id, this);
+        if (onOpen != null) {
+            onOpen.accept(player);
+        }
+        if (!autoUpdate) {
+            return;
+        }
         Scheduler.CancellableTask task = LibraryPlugin.getInstance().getScheduler().runTaskTimerCancellable(
                 LibraryPlugin.getInstance().getPlugin(),
                 () -> {
@@ -147,70 +210,120 @@ public abstract class Menu {
                         currentlyOpenedMenus.remove(id);
                         return;
                     }
-                    if (!autoUpdate) {
-                        return;
-                    }
-                    if (!(inv.getHolder() instanceof MenuInventoryHolder h)) {
-                        cancelCheck(player);
-                        return;
-                    }
-                    if (h.getMenu() != this || !h.getViewerId().equals(id)) {
-                        return;
-                    }
-                    Map<Integer, Button> defined = getButtons(player);
-                    int invSize = size(defined);
-                    if (inv.getSize() != invSize) {
-                        open(player);
-                        return;
-                    }
-                    fillInventory(h, player, defined, invSize);
+                    update(player);
                 },
-                MENU_UPDATE_DELAY_TICKS,
-                MENU_UPDATE_PERIOD_TICKS
+                UPDATE_DELAY_TICKS,
+                UPDATE_PERIOD_TICKS
         );
-        checkTasks.put(id, task);
+        CHECK_TASKS.put(id, task);
     }
 
-    public void buttonUpdate(Player player) {
-        Inventory top = XInventoryView.of(player.getOpenInventory()).getTopInventory();
-        if (!(top.getHolder() instanceof MenuInventoryHolder h)) {
-            return;
-        }
-        if (h.getMenu() != this || !h.getViewerId().equals(player.getUniqueId())) {
-            return;
-        }
-        Map<Integer, Button> defined = getButtons(player);
-        int invSize = size(defined);
-        if (top.getSize() != invSize) {
-            open(player);
-            return;
-        }
-        fillInventory(h, player, defined, invSize);
-    }
+    public static final class Layout {
 
-    public int size(Map<Integer, Button> buttons) {
-        int highest = -1;
-        for (int slot : buttons.keySet()) {
-            if (slot > highest) {
-                highest = slot;
+        private final Map<Integer, Button> buttons;
+
+        private Layout(Map<Integer, Button> buttons) {
+            this.buttons = buttons;
+        }
+
+        public Layout set(int slot, Button button) {
+            if (button != null) {
+                buttons.put(slot, button);
             }
+            return this;
         }
-        if (highest < 0) {
-            return 9;
+
+        public Layout set(int row, int col, Button button) {
+            return set(row * 9 + col, button);
         }
-        int rows = (highest + 9) / 9;
-        return Math.min(54, rows * 9);
     }
 
-    public String getTitle(Player player) {
-        return this.staticTitle;
-    }
+    public static final class Builder {
 
-    public abstract Map<Integer, Button> getButtons(Player player);
+        private final Function<Player, String> title;
+        private final Map<Integer, Button> buttons = new HashMap<>();
+        private int rows = 0;
+        private Renderer renderer;
+        private Button filler;
+        private boolean autoUpdate = false;
+        private boolean updateAfterClick = true;
+        private boolean cancelClicks = true;
+        private boolean refreshInPlace = true;
+        private Consumer<Player> onOpen;
+        private Consumer<Player> onClose;
+        private Menu previous;
 
-    public void onOpen(Player player) {
-    }
+        private Builder(Function<Player, String> title) {
+            this.title = title;
+        }
 
-    public void onClose(Player player) {
+        public Builder rows(int rows) {
+            this.rows = rows;
+            return this;
+        }
+
+        public Builder set(int slot, Button button) {
+            if (button != null) {
+                buttons.put(slot, button);
+            }
+            return this;
+        }
+
+        public Builder set(int row, int col, Button button) {
+            return set(row * 9 + col, button);
+        }
+
+        public Builder fill(Button filler) {
+            this.filler = filler;
+            return this;
+        }
+
+        public Builder render(Renderer renderer) {
+            this.renderer = renderer;
+            return this;
+        }
+
+        public Builder autoUpdate() {
+            return autoUpdate(true);
+        }
+
+        public Builder autoUpdate(boolean autoUpdate) {
+            this.autoUpdate = autoUpdate;
+            return this;
+        }
+
+        public Builder updateAfterClick(boolean updateAfterClick) {
+            this.updateAfterClick = updateAfterClick;
+            return this;
+        }
+
+        public Builder cancelClicks(boolean cancelClicks) {
+            this.cancelClicks = cancelClicks;
+            return this;
+        }
+
+        public Builder refreshInPlace(boolean refreshInPlace) {
+            this.refreshInPlace = refreshInPlace;
+            return this;
+        }
+
+        public Builder onOpen(Consumer<Player> onOpen) {
+            this.onOpen = onOpen;
+            return this;
+        }
+
+        public Builder onClose(Consumer<Player> onClose) {
+            this.onClose = onClose;
+            return this;
+        }
+
+        public Builder previous(Menu previous) {
+            this.previous = previous;
+            return this;
+        }
+
+        public Menu build() {
+            return new Menu(this);
+        }
     }
 }

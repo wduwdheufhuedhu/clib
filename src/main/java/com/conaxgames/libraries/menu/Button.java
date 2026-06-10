@@ -1,113 +1,140 @@
 package com.conaxgames.libraries.menu;
 
 import com.conaxgames.libraries.util.ItemBuilderUtil;
+import com.cryptomorin.xseries.XEnchantment;
+import com.cryptomorin.xseries.XItemFlag;
 import com.cryptomorin.xseries.XMaterial;
-import com.cryptomorin.xseries.XSound;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.UUID;
 
-public abstract class Button {
+public final class Button {
 
-    public static Button placeholder(Material material) {
-        return placeholder(material, (byte) 0, "");
+    @FunctionalInterface
+    public interface Click {
+        void on(Player player, ClickType type);
     }
 
-    public static Button placeholder(Material material, String title) {
-        return placeholder(material, (byte) 0, title);
+    private final ItemStack icon;
+    private final Click click;
+    private final boolean cancel;
+
+    private Button(ItemStack icon, Click click, boolean cancel) {
+        this.icon = icon;
+        this.click = click;
+        this.cancel = cancel;
     }
 
-    public static Button placeholder(Material material, byte data, String title) {
-        return new Button() {
-            @Override
-            public String getName(Player player) {
-                return title;
-            }
-
-            @Override
-            public List<String> getDescription(Player player) {
-                return List.of();
-            }
-
-            @Override
-            public Material getMaterial(Player player) {
-                return material;
-            }
-
-            @Override
-            public int getDamageValue(Player player) {
-                return data;
-            }
-        };
+    public static Button of(ItemStack icon) {
+        return new Button(icon, null, true);
     }
 
-    public static void playFail(Player player) {
-        XSound.BLOCK_GRASS_BREAK.play(player);
+    public static Builder builder(XMaterial material) {
+        return new Builder(new ItemBuilderUtil(material));
     }
 
-    public static void playSuccess(Player player) {
-        XSound.BLOCK_NOTE_BLOCK_HARP.play(player);
+    public static Builder builder(ItemStack icon) {
+        return new Builder(new ItemBuilderUtil(icon));
     }
 
-    public static void playNeutral(Player player) {
-        XSound.UI_BUTTON_CLICK.play(player);
+    public ItemStack icon() {
+        return icon;
     }
 
-    public abstract String getName(Player player);
-
-    public abstract List<String> getDescription(Player player);
-
-    public abstract Material getMaterial(Player player);
-
-    public int getDamageValue(Player player) {
-        return 0;
+    public boolean cancel() {
+        return cancel;
     }
 
-    public void clicked(Player player, int slot, ClickType clickType) {
+    public void click(Player player, ClickType type) {
+        if (click != null) {
+            click.on(player, type);
+        }
     }
 
-    public boolean shouldCancel(Player player, int slot, ClickType clickType) {
-        return true;
-    }
+    public static final class Builder {
 
-    public boolean shinyItem(Player player) {
-        return false;
-    }
+        private final ItemBuilderUtil item;
+        private Click click;
+        private boolean cancel = true;
 
-    public String skullOwner(Player player) {
-        return null;
-    }
-
-    public int getAmount(Player player) {
-        return 1;
-    }
-
-    public ItemStack getButtonItem(Player player) {
-        Material material = this.getMaterial(player);
-        if (material == null) {
-            material = XMaterial.BEDROCK.get();
+        private Builder(ItemBuilderUtil item) {
+            this.item = item;
         }
 
-        ItemBuilderUtil builder = new ItemBuilderUtil(material, this.getAmount(player), (byte) this.getDamageValue(player))
-                .setName(this.getName(player));
-
-        List<String> description = this.getDescription(player);
-        if (description != null) {
-            builder = builder.setLore(description);
+        public Builder name(String name) {
+            item.setName(name);
+            return this;
         }
 
-        String skull = skullOwner(player);
-        if (skull != null) {
-            builder = builder.setSkullOwner(skull);
+        public Builder lore(String... lore) {
+            item.setLore(lore);
+            return this;
         }
 
-        if (shinyItem(player)) {
-            builder = builder.setGlow();
+        public Builder lore(List<String> lore) {
+            item.setLore(lore);
+            return this;
         }
 
-        return builder.toItemStack();
+        public Builder amount(int amount) {
+            item.setAmount(amount);
+            return this;
+        }
+
+        public Builder data(int data) {
+            item.setDurability((short) data);
+            return this;
+        }
+
+        public Builder glow() {
+            return glow(true);
+        }
+
+        public Builder glow(boolean glow) {
+            item.setGlow(glow);
+            return this;
+        }
+
+        public Builder skull(String owner) {
+            item.setSkullOwner(owner);
+            return this;
+        }
+
+        public Builder skull(UUID owner) {
+            item.setSkullOwner(owner);
+            return this;
+        }
+
+        public Builder enchant(XEnchantment enchantment, int level) {
+            item.addEnchant(enchantment, level);
+            return this;
+        }
+
+        public Builder flags(XItemFlag... flags) {
+            item.setFlags(flags);
+            return this;
+        }
+
+        public Builder modelData(int modelData) {
+            item.setCustomModelData(modelData);
+            return this;
+        }
+
+        public Builder cancel(boolean cancel) {
+            this.cancel = cancel;
+            return this;
+        }
+
+        public Builder onClick(Click click) {
+            this.click = click;
+            return this;
+        }
+
+        public Button build() {
+            return new Button(item.toItemStack(), click, cancel);
+        }
     }
 }

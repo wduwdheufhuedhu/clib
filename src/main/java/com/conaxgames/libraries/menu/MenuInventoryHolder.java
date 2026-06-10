@@ -17,7 +17,6 @@ public final class MenuInventoryHolder implements InventoryHolder {
     @Getter
     private final UUID viewerId;
     @Setter
-    @Getter
     private Map<Integer, Button> slotButtons;
     private Inventory inventory;
 

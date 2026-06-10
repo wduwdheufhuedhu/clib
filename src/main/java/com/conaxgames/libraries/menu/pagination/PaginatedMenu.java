@@ -2,93 +2,179 @@ package com.conaxgames.libraries.menu.pagination;
 
 import com.conaxgames.libraries.menu.Button;
 import com.conaxgames.libraries.menu.Menu;
-import com.conaxgames.libraries.menu.pagination.buttons.PageButton;
-import lombok.Getter;
+import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-@Getter
-public abstract class PaginatedMenu extends Menu {
-    private int page = 1;
+public final class PaginatedMenu {
 
-    @Override
-    public String getTitle(Player player) {
-        return this.getPrePaginatedTitle(player) + " (" + this.page + "/" + this.getPages(player) + ")";
+    private PaginatedMenu() {
     }
 
-    @Override
-    protected boolean refreshInPlaceWhenPossible() {
-        return false;
+    public static Builder builder(String title) {
+        return new Builder(title);
     }
 
-    public final void modPage(Player player, int mod) {
-        this.page += mod;
-        this.openMenu(player, false);
-    }
+    public static final class Builder {
 
-    private boolean hasNext(Player player) {
-        int pg = this.page + 1;
-        return pg > 0 && this.getPages(player) >= pg;
-    }
+        private final String title;
+        private final Map<Integer, Button> globals = new HashMap<>();
+        private int rows = 6;
+        private int maxPerPage = 45;
+        private int[] contentSlots;
+        private Function<Player, List<Button>> entries = player -> Collections.emptyList();
+        private int previousSlot = 48;
+        private int nextSlot = 50;
+        private Button previousButton;
+        private Button nextButton;
+        private Button filler;
+        private boolean autoUpdate = false;
 
-    private boolean hasPrevious(Player player) {
-        int pg = this.page - 1;
-        return pg > 0 && this.getPages(player) >= pg;
-    }
-
-    public final int getPages(Player player) {
-        int buttonAmount = this.getAllPagesButtons(player).size();
-        if (buttonAmount == 0) {
-            return 1;
-        }
-        return (int) Math.ceil((double) buttonAmount / this.getMaxItemsPerPage(player));
-    }
-
-    @Override
-    public final Map<Integer, Button> getButtons(Player player) {
-        int maxItems = this.getMaxItemsPerPage(player);
-        int minIndex = (this.page - 1) * maxItems;
-        int maxIndex = this.page * maxItems;
-
-        HashMap<Integer, Button> buttons = new HashMap<>();
-
-        if (hasPrevious(player)) {
-            buttons.put(this.previousPageSlot(player), new PageButton(-1, this));
-        }
-        if (hasNext(player)) {
-            buttons.put(this.nextPageSlot(player), new PageButton(1, this));
+        private Builder(String title) {
+            this.title = title;
         }
 
-        for (Map.Entry<Integer, Button> entry : this.getAllPagesButtons(player).entrySet()) {
-            int ind = entry.getKey();
-            if (ind >= minIndex && ind < maxIndex) {
-                buttons.put(ind - minIndex, entry.getValue());
+        public Builder rows(int rows) {
+            this.rows = rows;
+            return this;
+        }
+
+        public Builder maxPerPage(int maxPerPage) {
+            this.maxPerPage = maxPerPage;
+            return this;
+        }
+
+        public Builder contentSlots(int... contentSlots) {
+            this.contentSlots = contentSlots;
+            return this;
+        }
+
+        public Builder entries(List<Button> entries) {
+            this.entries = player -> entries;
+            return this;
+        }
+
+        public Builder entries(Function<Player, List<Button>> entries) {
+            this.entries = entries;
+            return this;
+        }
+
+        public Builder previousSlot(int previousSlot) {
+            this.previousSlot = previousSlot;
+            return this;
+        }
+
+        public Builder nextSlot(int nextSlot) {
+            this.nextSlot = nextSlot;
+            return this;
+        }
+
+        public Builder previousButton(Button previousButton) {
+            this.previousButton = previousButton;
+            return this;
+        }
+
+        public Builder nextButton(Button nextButton) {
+            this.nextButton = nextButton;
+            return this;
+        }
+
+        public Builder set(int slot, Button button) {
+            if (button != null) {
+                globals.put(slot, button);
             }
+            return this;
         }
 
-        Map<Integer, Button> global = this.getGlobalButtons(player);
-        if (global != null) {
-            buttons.putAll(global);
+        public Builder fill(Button filler) {
+            this.filler = filler;
+            return this;
         }
 
-        return buttons;
+        public Builder autoUpdate() {
+            return autoUpdate(true);
+        }
+
+        public Builder autoUpdate(boolean autoUpdate) {
+            this.autoUpdate = autoUpdate;
+            return this;
+        }
+
+        public Menu build() {
+            int[] slots = contentSlots != null ? contentSlots : defaultSlots(maxPerPage);
+            int perPage = slots.length;
+            ItemStack previousIcon = previousButton != null ? previousButton.icon()
+                    : Button.builder(XMaterial.RED_DYE).name("&cPrevious Page").build().icon();
+            ItemStack nextIcon = nextButton != null ? nextButton.icon()
+                    : Button.builder(XMaterial.GREEN_DYE).name("&aNext Page").build().icon();
+
+            Menu[] self = new Menu[1];
+            int[] page = {0};
+
+            Function<Player, String> titleFunction = player -> {
+                int total = totalPages(entries.apply(player).size(), perPage);
+                int current = Math.min(page[0], total - 1) + 1;
+                return title + " (" + current + "/" + total + ")";
+            };
+
+            Menu.Builder builder = Menu.builder(titleFunction)
+                    .rows(rows)
+                    .refreshInPlace(false)
+                    .autoUpdate(autoUpdate);
+            globals.forEach(builder::set);
+            if (filler != null) {
+                builder.fill(filler);
+            }
+
+            builder.render((player, layout) -> {
+                List<Button> all = entries.apply(player);
+                int total = totalPages(all.size(), perPage);
+                page[0] = Math.max(0, Math.min(page[0], total - 1));
+
+                int start = page[0] * perPage;
+                for (int i = 0; i < perPage && start + i < all.size(); i++) {
+                    layout.set(slots[i], all.get(start + i));
+                }
+
+                if (page[0] > 0) {
+                    layout.set(previousSlot, arrow(previousIcon, () -> {
+                        page[0]--;
+                        self[0].open(player);
+                    }));
+                }
+                if (page[0] < total - 1) {
+                    layout.set(nextSlot, arrow(nextIcon, () -> {
+                        page[0]++;
+                        self[0].open(player);
+                    }));
+                }
+            });
+
+            Menu menu = builder.build();
+            self[0] = menu;
+            return menu;
+        }
+
+        private static Button arrow(ItemStack icon, Runnable onClick) {
+            return Button.builder(icon).onClick((player, type) -> onClick.run()).build();
+        }
+
+        private static int totalPages(int size, int perPage) {
+            return Math.max(1, (int) Math.ceil(size / (double) perPage));
+        }
+
+        private static int[] defaultSlots(int count) {
+            int[] slots = new int[count];
+            for (int i = 0; i < count; i++) {
+                slots[i] = i;
+            }
+            return slots;
+        }
     }
-
-    public int getMaxItemsPerPage(Player player) {
-        return 54;
-    }
-
-    public Map<Integer, Button> getGlobalButtons(Player player) {
-        return null;
-    }
-
-    public abstract String getPrePaginatedTitle(Player player);
-
-    public abstract Map<Integer, Button> getAllPagesButtons(Player player);
-
-    public abstract int previousPageSlot(Player player);
-
-    public abstract int nextPageSlot(Player player);
 }

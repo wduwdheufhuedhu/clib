@@ -23,7 +23,7 @@ public class ModuleCommands extends BaseCommand {
     @CommandCompletion("@modules")
     public void onList(CommandSender sender) {
         if (sender instanceof Player player) {
-            new ModuleMenu(moduleManager).openMenu(player);
+            ModuleMenu.create(moduleManager).open(player);
         } else {
             moduleManager.getModules().keySet().forEach(sender::sendMessage);
         }
