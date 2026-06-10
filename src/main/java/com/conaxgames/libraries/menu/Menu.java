@@ -70,7 +70,7 @@ public final class Menu {
         return currentlyOpenedMenus.get(player.getUniqueId());
     }
 
-    static void cancelCheck(Player player) {
+    public static void cancelCheck(Player player) {
         Scheduler.CancellableTask task = CHECK_TASKS.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
@@ -81,11 +81,11 @@ public final class Menu {
         return previous;
     }
 
-    boolean updateAfterClick() {
+    public boolean updateAfterClick() {
         return updateAfterClick;
     }
 
-    void closed(Player player) {
+    public void closed(Player player) {
         if (onClose != null) {
             onClose.accept(player);
         }
