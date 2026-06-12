@@ -23,7 +23,7 @@
 - [Scheduler](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/scheduler/Scheduler.java) — Bukkit/Folia scheduling abstraction
 - [BoardManager](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/board/BoardManager.java) — Scoreboard management
 - [Timer](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/timer/Timer.java) — Cooldown timers with events
-- [ItemBuilderUtil](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/ItemBuilderUtil.java) — Item builder utility
+- [ItemBuilder](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/ItemBuilder.java) — Fluent cross-version item builder
 - [PlayerInventoryUtil](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/util/inventory/PlayerInventoryUtil.java) — Inventory snapshot and restore
 - [CommentedConfiguration](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/config/CommentedConfiguration.java) — YAML with preserved comments
 - [CC](https://github.com/ConaxGames/cLibraries/tree/main/src/main/java/com/conaxgames/libraries/message/CC.java) — Chat colors and translations (including hex)
