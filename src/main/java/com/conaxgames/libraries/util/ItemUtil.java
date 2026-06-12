@@ -1,8 +1,6 @@
 package com.conaxgames.libraries.util;
 
 import com.conaxgames.libraries.message.CC;
-import com.conaxgames.libraries.message.TimeUtil;
-import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -10,9 +8,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionType;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -37,27 +32,6 @@ public final class ItemUtil {
             }
         }
         return result;
-    }
-
-    public static ItemStack createPotion(String name, PotionType type, int level, int duration) {
-        ItemStack itemStack = new ItemStack(XMaterial.POTION.get());
-        PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-
-        if (name != null) {
-            meta.setDisplayName(CC.translate(name));
-        }
-
-        meta.setLore(Arrays.asList(
-                "", CC.translate("&7" + formatName(type.getEffectType().getKey().getKey()) + " " + level + " Potion"),
-                CC.translate("&7    Duration: " + TimeUtil.millisToRoundedTime(duration * 1000L))));
-
-        meta.addCustomEffect(new PotionEffect(type.getEffectType(), duration * 20, level - 1), false);
-        itemStack.setItemMeta(meta);
-        return itemStack;
-    }
-
-    public static ItemStack createPotion(PotionType type, int level, int duration) {
-        return createPotion(null, type, level, duration);
     }
 
     public static ItemStack enchantItem(ItemStack itemStack, ItemEnchant... enchantments) {
@@ -218,18 +192,6 @@ public final class ItemUtil {
                     return 0;
             }
         }
-    }
-
-    private static String formatName(String key) {
-        var sb = new StringBuilder(key.length());
-        for (var word : key.split("_")) {
-            if (!sb.isEmpty()) sb.append(' ');
-            if (!word.isEmpty()) {
-                sb.append(Character.toUpperCase(word.charAt(0)));
-                if (word.length() > 1) sb.append(word.substring(1));
-            }
-        }
-        return sb.toString();
     }
 
     private static List<String> translate(List<String> text) {

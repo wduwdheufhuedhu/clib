@@ -4,6 +4,7 @@ import com.conaxgames.libraries.message.CC;
 import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XItemFlag;
 import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.XPotion;
 import com.cryptomorin.xseries.profiles.builder.XSkull;
 import com.cryptomorin.xseries.profiles.objects.Profileable;
 import org.bukkit.Bukkit;
@@ -13,6 +14,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -194,6 +196,21 @@ public final class ItemBuilder {
                 leather.setColor(color);
             }
         });
+        return this;
+    }
+
+    public ItemBuilder potionEffect(XPotion type, int durationTicks, int level) {
+        itemStack.editMeta(PotionMeta.class, meta -> {
+            var effect = type.buildPotionEffect(durationTicks, level);
+            if (effect != null) {
+                meta.addCustomEffect(effect, true);
+            }
+        });
+        return this;
+    }
+
+    public ItemBuilder potionColor(Color color) {
+        itemStack.editMeta(PotionMeta.class, meta -> meta.setColor(color));
         return this;
     }
 
