@@ -197,11 +197,16 @@ public final class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder unstackable() {
-        itemStack.editMeta(meta -> meta.getPersistentDataContainer().set(
-                new NamespacedKey("conaxgames", "unstackable"),
-                PersistentDataType.STRING,
-                UUID.randomUUID().toString()));
+    public ItemBuilder unstackable(boolean unstackable) {
+        itemStack.editMeta(meta -> {
+            var key = new NamespacedKey("conaxgames", "unstackable");
+            var container = meta.getPersistentDataContainer();
+            if (unstackable) {
+                container.set(key, PersistentDataType.STRING, UUID.randomUUID().toString());
+                return;
+            }
+            container.remove(key);
+        });
         return this;
     }
 
